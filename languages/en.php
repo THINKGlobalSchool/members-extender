@@ -13,6 +13,12 @@ $english = array(
 	// General
 	
 	// Labels
+	'members-extender:label:students' => 'Students',
+	'members-extender:label:teachers' => 'Teachers',
+	'members-extender:label:staff' => 'Staff',
+	'members-extender:label:studentrole' => 'Student Role',
+	'members-extender:label:teacherrole' => 'Teacher Role',
+	'members-extender:label:staffrole' => 'Staff Role',
 );
 
 add_translation('en',$english);
