@@ -36,6 +36,18 @@ function members_extender_get_custom_member_listing($page) {
 								AND md.name_id = $is_parent
 								AND md.value_id = $one_id)";
 
+	// This will exclude those in the hidden role
+	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
+	$role_relationship = ROLE_RELATIONSHIP;
+
+	$options['wheres'][] = "NOT EXISTS (
+			SELECT 1 FROM {$dbprefix}entity_relationships r_hidden 
+			WHERE r_hidden.guid_one = e.guid
+			AND r_hidden.relationship = '{$role_relationship}'
+			AND r_hidden.guid_two = {$hidden_role})";
+			
+	$options['order_by'] = 'ue.name ASC';
+
 	switch ($page) {
 		case 'students':
 			$role = elgg_get_plugin_setting('student_role', 'members-extender');
@@ -64,19 +76,21 @@ function members_extender_get_custom_member_listing($page) {
 			$content = elgg_list_entities_from_relationship_count($options);
 			break;
 		case 'online':
-			set_input('members_no_parents', 1);
+			set_input('members_custom', 1);
 			$count = find_active_users(600, 10, $offset, true);
 			$objects = find_active_users(600, 10, $offset);
 
 			if ($objects) {
 				$content = elgg_view_entity_list($objects, array(
 					'count' => $count,
-					'limit' => 10
-				));
+					'limit' => 10, 
+					'offset' => get_input('offset', 0),
+				)); 
 			}
 			break;
 		case 'newest':
 		default:
+			$options['order_by'] = 'e.time_created DESC';
 			$content = elgg_list_entities($options);
 			break;
 	}
@@ -117,6 +131,10 @@ function members_extender_get_number_users($show_deactivated = false) {
 	$is_parent = get_metastring_id('is_parent');
 	$one_id = get_metastring_id(1);
 
+	// Relationship info for excluding hidden members
+	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
+	$role_relationship = ROLE_RELATIONSHIP;
+
 	$query = "SELECT count(*) as count from {$CONFIG->dbprefix}entities e
 			  JOIN {$CONFIG->dbprefix}users_entity ue on ue.guid = e.guid
 			  WHERE type='user' $access 
@@ -125,7 +143,13 @@ function members_extender_get_number_users($show_deactivated = false) {
 						SELECT 1 FROM {$CONFIG->dbprefix}metadata md
 						WHERE md.entity_guid = e.guid
 						AND md.name_id = $is_parent
-						AND md.value_id = $one_id)";
+						AND md.value_id = $one_id)
+			  AND NOT EXISTS (
+						SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
+						WHERE r_hidden.guid_one = e.guid
+						AND r_hidden.relationship = '{$role_relationship}'
+						AND r_hidden.guid_two = {$hidden_role}
+			  )";
 
 	$result = get_data_row($query);
 

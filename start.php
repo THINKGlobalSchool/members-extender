@@ -69,8 +69,8 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 
 	// Get params
 	$seconds = $params['seconds'];
-	$limit = $params['limit'];
-	$offset = $params['offset'];
+	$limit = get_input('limit', $params['limit']);
+	$offset = get_input('offset', $params['offset']);
 	$count = $params['count'];
 
 	$time = time() - $seconds;
@@ -81,26 +81,39 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 		'offset' => $offset,
 		'count' => $count,
 		'joins' => array("join {$CONFIG->dbprefix}users_entity u on e.guid = u.guid"),
-		'wheres' => array(
-			"u.last_action >= {$time}",
-			"u.banned = 'no'", // Banned users shouldn't be online, but just in case
-		),
 		'order_by' => "u.last_action desc"
 	);
 	
-	// Check for input to ignore parents
-	if (get_input('members_no_parents')) {
+	// Check for input to customize results
+	if (get_input('members_custom')) {
 		// MD info for excluding parents
 		$is_parent = get_metastring_id('is_parent');
 		$one_id = get_metastring_id(1);
+
+		// Relationship info for excluding hidden members
+		$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
+		$role_relationship = ROLE_RELATIONSHIP;
 
 		$options['wheres'][] = "NOT EXISTS (
 					SELECT 1 FROM {$CONFIG->dbprefix}metadata md
 					WHERE md.entity_guid = e.guid
 					AND md.name_id = $is_parent
 					AND md.value_id = $one_id)";
+
+		$options['wheres'][] = "NOT EXISTS (
+				SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
+				WHERE r_hidden.guid_one = e.guid
+				AND r_hidden.relationship = '{$role_relationship}'
+				AND r_hidden.guid_two = {$hidden_role})";
 	}
+	
+	$options['wheres'][] = "(u.last_action >= {$time})";
 
 	$result = elgg_get_entities($options);
+	
+	if (!$result) {
+		$result = 1;
+	}
+
 	return $result;
 }
