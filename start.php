@@ -29,6 +29,11 @@ function members_extender_init() {
 	// Re-register our own page handler
 	elgg_unregister_page_handler('members');
 	elgg_register_page_handler('members', 'members_extender_page_handler');
+	
+	// If not logged in, don't allow user searches
+	if (!elgg_is_logged_in()) {
+		elgg_unregister_plugin_hook_handler('search', 'user', 'search_users_hook');
+	}
 }
 
 /**
