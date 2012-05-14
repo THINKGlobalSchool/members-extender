@@ -19,6 +19,7 @@ $english = array(
 	'members-extender:label:studentrole' => 'Student Role',
 	'members-extender:label:teacherrole' => 'Teacher Role',
 	'members-extender:label:staffrole' => 'Staff Role',
+	'members-extender:label:hiddenrole' => 'Hidden Role',
 );
 
 add_translation('en',$english);

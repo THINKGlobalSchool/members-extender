@@ -34,6 +34,15 @@ $staff_role_select = elgg_view('input/roledropdown', array(
 	'show_hidden' => TRUE,
 ));
 
+// Hidden role
+$hidden_role_label = elgg_echo('members-extender:label:hiddenrole');
+$hidden_role_select = elgg_view('input/roledropdown', array(
+	'name' => 'params[hidden_role]',
+	'id' => 'staff-role',
+	'value' => $vars['entity']->hidden_role,
+	'show_hidden' => TRUE,
+));
+
 
 $content = <<<HTML
 	<br />
@@ -48,6 +57,10 @@ $content = <<<HTML
 	<div>
 		<label>$staff_role_label</label><br />
 		$staff_role_select
+	</div>
+	<div>
+		<label>$hidden_role_label</label><br />
+		$hidden_role_select
 	</div>
 HTML;
 
