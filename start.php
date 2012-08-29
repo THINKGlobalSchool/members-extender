@@ -34,6 +34,9 @@ function members_extender_init() {
 	if (!elgg_is_logged_in()) {
 		elgg_unregister_plugin_hook_handler('search', 'user', 'search_users_hook');
 	}
+
+	// Register plugin hook to prevent friend river entries
+	elgg_register_plugin_hook_handler('creating', 'river', 'friend_river_interrupt_handler');
 }
 
 /**
@@ -123,4 +126,15 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 	}
 
 	return $result;
+}
+
+/**
+ * Hook handler to prevent friend river entries from being created
+ */
+function friend_river_interrupt_handler($hook, $type, $result, $params) {	
+	if ($result['view'] == 'river/relationship/friend/create') {
+		return FALSE; // Nope, sorry.
+	} else {
+		return $result;
+	}
 }
