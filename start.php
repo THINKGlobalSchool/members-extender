@@ -98,18 +98,20 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 		// Relationship info for excluding hidden members
 		$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
 		$role_relationship = ROLE_RELATIONSHIP;
+		
+		if ($hidden_role) {
+			$options['wheres'][] = "NOT EXISTS (
+						SELECT 1 FROM {$CONFIG->dbprefix}metadata md
+						WHERE md.entity_guid = e.guid
+						AND md.name_id = $is_parent
+						AND md.value_id = $one_id)";
 
-		$options['wheres'][] = "NOT EXISTS (
-					SELECT 1 FROM {$CONFIG->dbprefix}metadata md
-					WHERE md.entity_guid = e.guid
-					AND md.name_id = $is_parent
-					AND md.value_id = $one_id)";
-
-		$options['wheres'][] = "NOT EXISTS (
-				SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
-				WHERE r_hidden.guid_one = e.guid
-				AND r_hidden.relationship = '{$role_relationship}'
-				AND r_hidden.guid_two = {$hidden_role})";
+			$options['wheres'][] = "NOT EXISTS (
+					SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
+					WHERE r_hidden.guid_one = e.guid
+					AND r_hidden.relationship = '{$role_relationship}'
+					AND r_hidden.guid_two = {$hidden_role})";
+		}
 	}
 	
 	$options['wheres'][] = "(u.last_action >= {$time})";

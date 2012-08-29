@@ -40,11 +40,13 @@ function members_extender_get_custom_member_listing($page) {
 	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
 	$role_relationship = ROLE_RELATIONSHIP;
 
-	$options['wheres'][] = "NOT EXISTS (
-			SELECT 1 FROM {$dbprefix}entity_relationships r_hidden 
-			WHERE r_hidden.guid_one = e.guid
-			AND r_hidden.relationship = '{$role_relationship}'
-			AND r_hidden.guid_two = {$hidden_role})";
+	if ($hidden_role) {
+		$options['wheres'][] = "NOT EXISTS (
+				SELECT 1 FROM {$dbprefix}entity_relationships r_hidden 
+				WHERE r_hidden.guid_one = e.guid
+				AND r_hidden.relationship = '{$role_relationship}'
+				AND r_hidden.guid_two = {$hidden_role})";
+	}
 			
 	$options['order_by'] = 'ue.name ASC';
 
@@ -143,13 +145,15 @@ function members_extender_get_number_users($show_deactivated = false) {
 						SELECT 1 FROM {$CONFIG->dbprefix}metadata md
 						WHERE md.entity_guid = e.guid
 						AND md.name_id = $is_parent
-						AND md.value_id = $one_id)
-			  AND NOT EXISTS (
-						SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
-						WHERE r_hidden.guid_one = e.guid
-						AND r_hidden.relationship = '{$role_relationship}'
-						AND r_hidden.guid_two = {$hidden_role}
-			  )";
+						AND md.value_id = $one_id)";
+						
+	if ($hidden_role) {
+		$query .= "AND NOT EXISTS (
+					SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
+					WHERE r_hidden.guid_one = e.guid
+					AND r_hidden.relationship = '{$role_relationship}'
+					AND r_hidden.guid_two = {$hidden_role})";
+	}
 
 	$result = get_data_row($query);
 
