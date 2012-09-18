@@ -94,20 +94,12 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 	
 	// Check for input to customize results
 	if (get_input('members_custom')) {
-		// MD info for excluding parents
-		$is_parent = get_metastring_id('is_parent');
-		$one_id = get_metastring_id(1);
-
 		// Relationship info for excluding hidden members
 		$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
 		$role_relationship = ROLE_RELATIONSHIP;
 		
 		if ($hidden_role) {
-			$options['wheres'][] = "NOT EXISTS (
-						SELECT 1 FROM {$CONFIG->dbprefix}metadata md
-						WHERE md.entity_guid = e.guid
-						AND md.name_id = $is_parent
-						AND md.value_id = $one_id)";
+			$options['wheres'][] = members_extender_get_exclude_parent_sql();
 
 			$options['wheres'][] = "NOT EXISTS (
 					SELECT 1 FROM {$CONFIG->dbprefix}entity_relationships r_hidden 
