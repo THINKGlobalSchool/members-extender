@@ -27,14 +27,8 @@ function members_extender_get_custom_member_listing($page) {
 	$options['wheres'][] = "ue.banned = 'no'";
 	$options['joins'] = "JOIN {$dbprefix}users_entity ue on ue.guid = e.guid";
 	
-	// This will exclude parents
-	$is_parent = get_metastring_id('is_parent');
-	$one_id = get_metastring_id(1);
-	$options['wheres'][] = "NOT EXISTS (
-								SELECT 1 FROM {$dbprefix}metadata md
-								WHERE md.entity_guid = e.guid
-								AND md.name_id = $is_parent
-								AND md.value_id = $one_id)";
+	// Exclude parents (if enabled)
+	$options['wheres'][] = members_extender_get_exclude_parent_sql();
 
 	// This will exclude those in the hidden role
 	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
@@ -129,23 +123,18 @@ function members_extender_get_number_users($show_deactivated = false) {
 		$access = "and " . get_access_sql_suffix();
 	}
 
-	// MD info for excluding parents
-	$is_parent = get_metastring_id('is_parent');
-	$one_id = get_metastring_id(1);
-
 	// Relationship info for excluding hidden members
 	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
 	$role_relationship = ROLE_RELATIONSHIP;
+	
+	if (members_extender_get_exclude_parent_sql()) {
+		$parent_sql = "AND " . members_extender_get_exclude_parent_sql();
+	}
 
 	$query = "SELECT count(*) as count from {$CONFIG->dbprefix}entities e
 			  JOIN {$CONFIG->dbprefix}users_entity ue on ue.guid = e.guid
 			  WHERE type='user' $access 
-			  AND ue.banned = 'no'
-			  AND NOT EXISTS (
-						SELECT 1 FROM {$CONFIG->dbprefix}metadata md
-						WHERE md.entity_guid = e.guid
-						AND md.name_id = $is_parent
-						AND md.value_id = $one_id)";
+			  AND ue.banned = 'no'" . $parent_sql;
 						
 	if ($hidden_role) {
 		$query .= "AND NOT EXISTS (
@@ -162,4 +151,28 @@ function members_extender_get_number_users($show_deactivated = false) {
 	}
 
 	return false;
+}
+
+/**
+ * Get SQL to exclude parent (parentportal plugin) from members listings
+ */
+function members_extender_get_exclude_parent_sql() {
+	if (elgg_is_active_plugin('parentportal')) {
+		global $CONFIG;
+
+		// MD info for excluding parents
+		$is_parent = get_metastring_id('is_parent');
+		$one_id = get_metastring_id(1);
+		
+		$parent_sql = "
+		  NOT EXISTS (
+					SELECT 1 FROM {$CONFIG->dbprefix}metadata md
+					WHERE md.entity_guid = e.guid
+					AND md.name_id = $is_parent
+					AND md.value_id = $one_id)";
+					
+		return $parent_sql;
+	} else {
+		return '';
+	}
 }
