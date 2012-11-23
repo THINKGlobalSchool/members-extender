@@ -11,8 +11,8 @@
  */
 
 $custom_selected = get_input('members_custom_tab_selected');
-// Tack these tabs on the to the tab array if under members/schools context
-if (elgg_get_context() == 'members' || elgg_get_context() == 'schools') {
+// Tack these tabs on the to the tab array if under members context
+if (elgg_get_context() == 'members') {
 	if (elgg_get_plugin_setting('student_role', 'members-extender')) {
 		$vars['tabs']['students'] = array(
 			'title' => elgg_echo('members-extender:label:students'),
