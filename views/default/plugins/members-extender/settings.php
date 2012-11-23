@@ -15,6 +15,7 @@ $student_role_select = elgg_view('input/roledropdown', array(
 	'name' => 'params[student_role]',
 	'id' => 'student-role',
 	'value' => $vars['entity']->student_role,
+	'show_none' => TRUE,
 	'show_hidden' => TRUE,
 ));
 
@@ -23,6 +24,7 @@ $teacher_role_select = elgg_view('input/roledropdown', array(
 	'name' => 'params[teacher_role]',
 	'id' => 'teacher-role',
 	'value' => $vars['entity']->teacher_role,
+	'show_none' => TRUE,
 	'show_hidden' => TRUE,
 ));
 
@@ -31,6 +33,7 @@ $staff_role_select = elgg_view('input/roledropdown', array(
 	'name' => 'params[staff_role]',
 	'id' => 'staff-role',
 	'value' => $vars['entity']->staff_role,
+	'show_none' => TRUE,
 	'show_hidden' => TRUE,
 ));
 
@@ -40,6 +43,7 @@ $hidden_role_select = elgg_view('input/roledropdown', array(
 	'name' => 'params[hidden_role]',
 	'id' => 'staff-role',
 	'value' => $vars['entity']->hidden_role,
+	'show_none' => TRUE,
 	'show_hidden' => TRUE,
 ));
 
