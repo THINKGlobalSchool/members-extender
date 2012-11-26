@@ -8,7 +8,9 @@
  */
 
 $entity = $vars['entity'];
-$size = elgg_extract('size', $vars, 'tiny');
+
+// Tweak: allow icon size to be set via input
+$size = elgg_extract('size', $vars, get_input('user_gallery_size', 'tiny'));
 
 $icon = elgg_view_entity_icon($entity, $size, $vars);
 
@@ -25,7 +27,6 @@ if (!elgg_is_logged_in() && $s = strpos($entity->name, ' ')) {
 } else {
 	$name = $entity->name;
 }
-
 
 
 $title = "<a href=\"" . $entity->getUrl() . "\" $rel>" . $name . "</a>";
