@@ -9,6 +9,6 @@
  * @link http://www.thinkglobalschool.com/
  */
 
-if (elgg_in_context('members') && elgg_in_context('gallery')) {
+if ((elgg_in_context('members') || elgg_in_context('members_custom_avatar')) && elgg_in_context('gallery')) {
 	$vars['class'] = 'members-gallery-avatar';
 }

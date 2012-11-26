@@ -10,6 +10,6 @@
  * 
  */
 
-if (elgg_in_context('members')) {
+if ((elgg_in_context('members') || elgg_in_context('members_custom_avatar'))) {
 	$vars['gallery_class'] = 'elgg-gallery-users';
 }
