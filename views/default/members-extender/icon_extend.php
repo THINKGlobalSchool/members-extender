@@ -16,9 +16,11 @@ if ((elgg_in_context('members') || elgg_in_context('members_custom_avatar')) && 
 		if (strlen($s) > 11) {
 			$user_name .= " " . elgg_get_excerpt($s, 11);
 		} else {
-			$user_name .= " {$s}";
+			$user_name .= " " . $s;
 		}
 	}
+
+	trim($user_name);
 
 	$user_link = $user->getURL();
 	$location = $user->location;
