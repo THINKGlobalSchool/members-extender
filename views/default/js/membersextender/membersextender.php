@@ -30,7 +30,6 @@ elgg.membersextender.hoverGalleryAvatar = function(event) {
 
 	if (!$hoveravatar) {
 		var $hoveravatar = $(this).parent().find('.members-gallery-hover');
-		console.log($hoveravatar);
 		$(this).data('hoveravatar', $hoveravatar);
 	}
 
@@ -43,5 +42,27 @@ elgg.membersextender.hoverGalleryAvatar = function(event) {
 	event.preventDefault();
 }
 
+elgg.membersextender.positionAchievements = function(hook, type, params, options) {
+	if (params.sender.closest('div.elgg-avatar-medium').length > 0) {
+		$avatar = params.avatar;
+		$_this = params.sender
+		$menu = params.menu;
+
+		var offset = $avatar.offset();
+		var top = offset.top + $avatar.height() + 'px';
+		var left = offset.left + 'px';
+	
+		$menu.appendTo('body')
+			.css('position', 'absolute')
+			.css("top", top)
+			.css("left", left)
+			.fadeIn('normal');
+
+		return false;
+	}
+	return true;
+}
+
 elgg.register_hook_handler('init', 'system', elgg.membersextender.init);
 elgg.register_hook_handler('generic_populated', 'modules', elgg.membersextender.init);
+elgg.register_hook_handler('setPopupLocation', 'achievements', elgg.membersextender.positionAchievements);

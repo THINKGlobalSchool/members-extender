@@ -48,6 +48,9 @@ function members_extender_init() {
 	// Hook into find_active_users hook to ignore banned and optionally parents users
 	elgg_register_plugin_hook_handler('find_active_users', 'system', 'members_extender_active_members_handler');
 
+	// Extend groups page handler
+	elgg_register_plugin_hook_handler('route', 'groups', 'members_extender_route_groups_handler', 50);
+
 	// Re-register our own page handler
 	elgg_unregister_page_handler('members');
 	elgg_register_page_handler('members', 'members_extender_page_handler');
@@ -72,7 +75,7 @@ function members_extender_page_handler($page) {
 
 	// Use gallery view 
 	set_input('list_type', 'gallery');
-	set_input('user_gallery_size', 'medium');
+	set_input('user_gallery_size', get_input('user_gallery_size', 'medium'));
 	set_input('limit', 28);
 
 	if (!isset($page[0])) {
@@ -145,6 +148,18 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 	}
 
 	return $result;
+}
+
+// Hook into group routing to provide extra content
+function members_extender_route_groups_handler($hook, $type, $return, $params) {
+	if (is_array($return['segments']) && $return['segments'][0] == 'members') {
+		// Use gallery view 
+		set_input('list_type', 'gallery');
+		set_input('user_gallery_size', get_input('user_gallery_size', 'medium'));
+		set_input('limit', 28);
+		elgg_push_context('members_custom_avatar');
+	}
+	return $return;
 }
 
 /**

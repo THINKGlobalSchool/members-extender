@@ -21,19 +21,40 @@
 }
 
 .elgg-avatar > .elgg-icon-hover-menu  {
-	z-index: 3;
+	z-index: 4;
 }
 
 .members-gallery-hover .members-gallery-hover-name {
 	font-weight: bold;
-	font-size: 1.4em;
+	font-size: 1.1em;
+	width: 100%;
 	padding: 5px;
 	display: block;
-}
-
-.members-gallery-hover .members-gallery-hover-name a,
-.members-gallery-hover .members-gallery-hover-name a:hover,
-.members-gallery-hover .members-gallery-hover-name a:active {
 	color: #FFFFFF;
 	text-decoration: none;
+}
+
+/** Member hover location **/
+.members-gallery-hover .members-gallery-hover-location {
+	color: #FFFFFF;
+	padding-left: 5px;
+	display: block;
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+.members-gallery-hover .members-gallery-hover-location a,
+.members-gallery-hover .members-gallery-hover-location a:hover, {
+	color: #FFFFFF !important;
+	text-decoration: none;
+}
+
+/** Fix achievements hover icon **/
+.achievements-hover-badge-medium {
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 5px;
+    bottom: 0;
+    top: auto !important;
+	z-index: 4;
 }
