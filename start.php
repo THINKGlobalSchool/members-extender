@@ -9,7 +9,7 @@
  * @link http://www.thinkglobalschool.com/
  * 
  * OVERRIDES:
- *
+ * - default/user/default (Changes to the user entity view)
  */
 
 // Register init
@@ -17,11 +17,33 @@ elgg_register_event_handler('init', 'system', 'members_extender_init');
 
 // Init
 function members_extender_init() {
+
 	// Register library
 	elgg_register_library('elgg:membersextender', elgg_get_plugins_path() . 'members-extender/lib/membersextender.php');
 
+	// Register members CSS
+	$m_css = elgg_get_simplecache_url('css', 'membersextender/css');
+	elgg_register_simplecache_view('css/membersextender/css');
+	elgg_register_css('elgg.membersextender', $m_css);
+	elgg_load_css('elgg.membersextender');
+
+	// Register members JS
+	$m_js = elgg_get_simplecache_url('js', 'membersextender/membersextender');
+	elgg_register_simplecache_view('js/membersextender/membersextender');
+	elgg_register_js('elgg.membersextender', $m_js);
+	elgg_load_js('elgg.membersextender');
+
 	// Extend navigation/tabs view
 	elgg_extend_view('navigation/tabs', 'members-extender/navigation/tabs', 0);
+
+	// Prepend gallery view to allow injecting gallery class via set_input
+	elgg_extend_view('page/components/gallery', 'members-extender/gallery_prepend', 0);
+
+	// Extend user icon view
+	elgg_extend_view('icon/user/default', 'members-extender/icon_extend');
+
+	// Prepend user icon view
+	elgg_extend_view('icon/user/default', 'members-extender/icon_prepend', 0);
 
 	// Hook into find_active_users hook to ignore banned and optionally parents users
 	elgg_register_plugin_hook_handler('find_active_users', 'system', 'members_extender_active_members_handler');
@@ -47,6 +69,11 @@ function members_extender_init() {
  */
 function members_extender_page_handler($page) {
 	$base = elgg_get_plugins_path() . 'members/pages/members';
+
+	// Use gallery view 
+	set_input('list_type', 'gallery');
+	set_input('user_gallery_size', 'medium');
+	set_input('limit', 14);
 
 	if (!isset($page[0])) {
 		$page[0] = 'newest';
