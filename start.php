@@ -73,7 +73,7 @@ function members_extender_page_handler($page) {
 	// Use gallery view 
 	set_input('list_type', 'gallery');
 	set_input('user_gallery_size', 'medium');
-	set_input('limit', 14);
+	set_input('limit', 28);
 
 	if (!isset($page[0])) {
 		$page[0] = 'newest';
