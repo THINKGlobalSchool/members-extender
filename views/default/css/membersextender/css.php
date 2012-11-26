@@ -38,6 +38,8 @@
 .members-gallery-hover .members-gallery-hover-location {
 	color: #FFFFFF;
 	padding-left: 5px;
+	padding-right: 5px;
+	width: 90px;
 	display: block;
 	font-size: 0.8em;
 	font-style: italic;
