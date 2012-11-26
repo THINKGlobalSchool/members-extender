@@ -14,7 +14,7 @@ if ((elgg_in_context('members') || elgg_in_context('members_custom_avatar')) && 
 	$user_name_segments = explode(" ", $user->name);
 	foreach ($user_name_segments as $s) {
 		if (strlen($s) > 11) {
-			$user_name .= " " . elgg_get_excerpt($s, 11);
+			$user_name .= " " . elgg_get_excerpt($s, 9);
 		} else {
 			$user_name .= " " . $s;
 		}

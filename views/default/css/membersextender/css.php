@@ -27,7 +27,7 @@
 .members-gallery-hover .members-gallery-hover-name {
 	font-weight: bold;
 	font-size: 1.1em;
-	width: 98%;
+	width: 90px;
 	padding: 5px;
 	display: block;
 	color: #FFFFFF;
