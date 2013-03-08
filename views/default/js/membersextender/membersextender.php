@@ -43,7 +43,8 @@ elgg.membersextender.hoverGalleryAvatar = function(event) {
 }
 
 elgg.membersextender.positionAchievements = function(hook, type, params, options) {
-	if (params.sender.closest('div.elgg-avatar-medium').length > 0) {
+	var $avatar = params.sender.closest('div.elgg-avatar-medium');
+	if ($avatar.length > 0 && $avatar.closest('.elgg-list-river').length == 0) {
 		$avatar = params.avatar;
 		$_this = params.sender
 		$menu = params.menu;
