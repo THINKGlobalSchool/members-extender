@@ -60,3 +60,14 @@
     top: auto !important;
 	z-index: 4;
 }
+
+.elgg-river-item .achievements-hover-badge-medium {
+	-webkit-border-top-left-radius: 5px !important;
+	-webkit-border-bottom-right-radius: 5px !important;
+	-moz-border-radius-topleft: 5px !important;
+	-moz-border-radius-bottomright: 5px !important;
+	border-top-left-radius: 5px !important;
+	border-bottom-right-radius: 5px !important;
+    top: 0 !important;
+}
+
