@@ -45,11 +45,18 @@ function members_extender_init() {
 	// Prepend user icon view
 	elgg_extend_view('icon/user/default', 'members-extender/icon_prepend', 0);
 
+	// Extend roles form
+	elgg_extend_view('forms/roles/edit/extend', 'members-extender/role_form');
+
 	// Hook into find_active_users hook to ignore banned and optionally parents users
 	elgg_register_plugin_hook_handler('find_active_users', 'system', 'members_extender_active_members_handler');
 
 	// Extend groups page handler
 	elgg_register_plugin_hook_handler('route', 'groups', 'members_extender_route_groups_handler', 50);
+
+	// Hook into create/update events to save roles for an entity
+	elgg_register_event_handler('update', 'object', 'members_extender_roles_save_members_tab');
+	elgg_register_event_handler('create', 'object', 'members_extender_roles_save_members_tab');
 
 	// Re-register our own page handler
 	elgg_unregister_page_handler('members');
@@ -171,4 +178,16 @@ function friend_river_interrupt_handler($hook, $type, $result, $params) {
 	} else {
 		return $result;
 	}
+}
+
+/**
+ * Add display as members tab metadata to roles
+ */
+function members_extender_roles_save_members_tab($event, $object_type, $object) {
+	if (elgg_instanceof($object, 'object', 'role')) {
+		$display_members_tab = get_input('display_members_tab', 0);
+//		$object->setMetaData('display_members_tab', $display_members_tab);
+		$object->display_members_tab = $display_members_tab;
+	}
+	return TRUE;
 }

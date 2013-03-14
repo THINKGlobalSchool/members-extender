@@ -45,27 +45,6 @@ function members_extender_get_custom_member_listing($page) {
 	$options['order_by'] = 'ue.name ASC';
 
 	switch ($page) {
-		case 'students':
-			$role = elgg_get_plugin_setting('student_role', 'members-extender');
-			$options['relationship'] = ROLE_RELATIONSHIP;
-			$options['relationship_guid'] = $role;
-			$options['inverse_relationship'] = TRUE;
-			$content = elgg_list_entities_from_relationship($options);
-			break;
-		case 'teachers':
-			$role = elgg_get_plugin_setting('teacher_role', 'members-extender');
-			$options['relationship'] = ROLE_RELATIONSHIP;
-			$options['relationship_guid'] = $role;
-			$options['inverse_relationship'] = TRUE;
-			$content = elgg_list_entities_from_relationship($options);
-			break;
-		case 'staff':
-			$role = elgg_get_plugin_setting('staff_role', 'members-extender');
-			$options['relationship'] = ROLE_RELATIONSHIP;
-			$options['relationship_guid'] = $role;
-			$options['inverse_relationship'] = TRUE;
-			$content = elgg_list_entities_from_relationship($options);
-			break;
 		case 'popular':
 			$options['relationship'] = 'friend';
 			$options['inverse_relationship'] = FALSE;
@@ -85,9 +64,26 @@ function members_extender_get_custom_member_listing($page) {
 			}
 			break;
 		case 'newest':
-		default:
 			$options['order_by'] = 'e.time_created DESC';
 			$content = elgg_list_entities($options);
+			break;
+		default:
+			// Show newest members if page is blank
+			if (!$page) {
+				forward('members/newest');
+			}
+
+			// Get role name, replace _ with ' '
+			$role_name = str_replace('_', ' ', strtolower($page));
+			$role = get_role_by_title($role_name);
+
+			// Role options
+			$options['relationship'] = ROLE_RELATIONSHIP;
+			$options['relationship_guid'] = $role->guid;
+			$options['inverse_relationship'] = TRUE;
+
+			// Display role members
+			$content = elgg_list_entities_from_relationship($options);
 			break;
 	}
 	
