@@ -13,27 +13,25 @@
 $custom_selected = get_input('members_custom_tab_selected');
 // Tack these tabs on the to the tab array if under members context
 if (elgg_get_context() == 'members') {
-	if (elgg_get_plugin_setting('student_role', 'members-extender')) {
-		$vars['tabs']['students'] = array(
-			'title' => elgg_echo('members-extender:label:students'),
-			'url' => "members/students",
-			'selected' => $custom_selected == 'students',
-		);
-	}
-	
-	if (elgg_get_plugin_setting('teacher_role', 'members-extender')) {
-		$vars['tabs']['teachers'] = array(
-			'title' => elgg_echo('members-extender:label:teachers'),
-			'url' => "members/teachers",
-			'selected' => $custom_selected == 'teachers',
-		);
-	}
 
-	if (elgg_get_plugin_setting('staff_role', 'members-extender')) {
-		$vars['tabs']['staff'] = array(
-			'title' => elgg_echo('members-extender:label:staff'),
-			'url' => "members/staff",
-			'selected' => $custom_selected == 'staff',
-		);
+	$options = array(
+		'type' => 'object',
+		'subtype' => 'role',
+		'limit' => ELGG_ENTITIES_NO_VALUE,
+		'metadata_name' => 'display_members_tab',
+		'metadata_value' => 1,
+	);
+
+	$members_roles = elgg_get_entities_from_metadata($options);
+
+	if (count($members_roles)) {
+		foreach ($members_roles as $role) {
+			$role_lower = str_replace(' ', '_', strtolower($role->title));
+			$vars['tabs'][$role_lower] = array(
+				'title' => $role->title,
+				'url' => "members/$role_lower",
+				'selected' => $custom_selected == $role_lower,
+			);
+		}
 	}
 }
