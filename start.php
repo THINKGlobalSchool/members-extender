@@ -157,7 +157,9 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
 	return $result;
 }
 
-// Hook into group routing to provide extra content
+/**
+ * Hook into group routing to provide extra content
+ */
 function members_extender_route_groups_handler($hook, $type, $return, $params) {
 	if (is_array($return['segments']) && $return['segments'][0] == 'members') {
 		// Use gallery view 
@@ -168,6 +170,7 @@ function members_extender_route_groups_handler($hook, $type, $return, $params) {
 	}
 	return $return;
 }
+
 
 /**
  * Hook handler to prevent friend river entries from being created
