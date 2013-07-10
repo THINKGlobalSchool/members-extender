@@ -93,12 +93,12 @@ function members_extender_get_custom_member_listing($page) {
 
 	$params = array(
 		'content' => $content,
-		'sidebar' => elgg_view('members/sidebar'),
+	//	'sidebar' => elgg_view('members/sidebar'),
 		'title' => $title . " ($num_members)",
 		'filter_override' => elgg_view('members/nav', array('selected' => $page)),
 	);
 
-	$body = elgg_view_layout('content', $params);
+	$body = elgg_view_layout('content_one_column', $params);
 
 	echo elgg_view_page($title, $body);
 }
