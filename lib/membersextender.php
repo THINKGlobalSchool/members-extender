@@ -98,7 +98,7 @@ function members_extender_get_custom_member_listing($page) {
 		'filter_override' => elgg_view('members/nav', array('selected' => $page)),
 	);
 
-	$body = elgg_view_layout('content_one_column', $params);
+	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($title, $body);
 }
