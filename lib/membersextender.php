@@ -116,7 +116,7 @@ function members_extender_get_number_users($show_deactivated = false) {
 	$access = "";
 
 	if (!$show_deactivated) {
-		$access = "and " . get_access_sql_suffix();
+		$access = "and " . _elgg_get_access_where_sql();
 	}
 
 	// Relationship info for excluding hidden members
