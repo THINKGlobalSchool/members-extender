@@ -5,99 +5,33 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2012
+ * @copyright THINK Global School 2010 - 2014
  * @link http://www.thinkglobalschool.com/
  * 
  */
 
-/** Get page content for custom role listings **/
+/**
+ * Get custom member listing content
+ */
 function members_extender_get_custom_member_listing($page) {
-	$num_members = members_extender_get_number_users();
-
-	$title = elgg_echo('members');
-
-	$options = array('type' => 'user', 'full_view' => false);
-	
-	// Set seperate 'selected' data for custom tabs due to a chicken and egg issue
-	set_input('members_custom_tab_selected', $page);
-
-	$dbprefix = elgg_get_config('dbprefix');
-
-	// This will remove banned users
-	$options['wheres'][] = "ue.banned = 'no'";
-	$options['joins'] = "JOIN {$dbprefix}users_entity ue on ue.guid = e.guid";
-	
-	// Exclude parents (if enabled)
-	$options['wheres'][] = members_extender_get_exclude_parent_sql();
-
-	// This will exclude those in the hidden role
-	$hidden_role = elgg_get_plugin_setting('hidden_role', 'members-extender');
-	$role_relationship = ROLE_RELATIONSHIP;
-
-	if ($hidden_role) {
-		$options['wheres'][] = "NOT EXISTS (
-				SELECT 1 FROM {$dbprefix}entity_relationships r_hidden 
-				WHERE r_hidden.guid_one = e.guid
-				AND r_hidden.relationship = '{$role_relationship}'
-				AND r_hidden.guid_two = {$hidden_role})";
-	}
-			
-	$options['order_by'] = 'ue.name ASC';
-
-	switch ($page) {
-		case 'popular':
-			$options['relationship'] = 'friend';
-			$options['inverse_relationship'] = FALSE;
-			$content = elgg_list_entities_from_relationship_count($options);
-			break;
-		case 'online':
-			set_input('members_custom', 1);
-			$count = find_active_users(600, 10, $offset, true);
-			$objects = find_active_users(600, 10, $offset);
-
-			if ($objects) {
-				$content = elgg_view_entity_list($objects, array(
-					'count' => $count,
-					'limit' => 10, 
-					'offset' => get_input('offset', 0),
-				)); 
-			}
-			break;
-		case 'newest':
-			$options['order_by'] = 'e.time_created DESC';
-			$content = elgg_list_entities($options);
-			break;
-		default:
-			// Show newest members if page is blank
-			if (!$page) {
-				forward('members/newest');
-			}
-
-			// Get role name, replace _ with ' '
-			$role_name = str_replace('_', ' ', strtolower($page));
-			$role = get_role_by_title($role_name);
-
-			// Role options
-			$options['relationship'] = ROLE_RELATIONSHIP;
-			$options['relationship_guid'] = $role->guid;
-			$options['inverse_relationship'] = TRUE;
-
-			// Display role members
-			$content = elgg_list_entities_from_relationship($options);
-			break;
-	}
-	
-	if (!$content) {
-		$content = "<div style='width: 100%; text-align: center; margin: 10px;'><strong>No results</strong></div>";
-	}
+	$dashboard = elgg_view('drilltrate/dashboard', array(
+		'menu_name' => 'members_custom',
+		'infinite_scroll' => false,
+		'main_class' => '',
+		'default_params' => array(
+			'type' => 'all',
+		),
+		'list_url' => elgg_get_site_url() . 'ajax/view/members-extender/list',
+		'id' => 'members-custom-menu'
+	));
 
 	$params = array(
-		'content' => $content,
-	//	'sidebar' => elgg_view('members/sidebar'),
-		'title' => $title . " ($num_members)",
-		'filter_override' => elgg_view('members/nav', array('selected' => $page)),
+		'content' => $dashboard,
+		'title' => $title,
+		'filter' => ' '
 	);
 
+	$title = elgg_echo('members');
 	$body = elgg_view_layout('content', $params);
 
 	echo elgg_view_page($title, $body);

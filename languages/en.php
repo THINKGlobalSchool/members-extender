@@ -13,8 +13,10 @@ $english = array(
 	// General
 	
 	// Labels
+	'members-extender:label:all' => 'All',
 	'members-extender:label:hiddenrole' => 'Hidden Role',
 	'members-extender:label:displayonmembers' => 'Display as tab on Members page',
+	'members-extender:label:subcategories' => 'Sub categories (roles) for advanced filtering on members page',
 );
 
 add_translation('en',$english);

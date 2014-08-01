@@ -71,3 +71,12 @@
     top: 0 !important;
 }
 
+/** Admin area **/
+.members-sub-categories-container {
+	display: none;
+}
+
+.members-show-subcategories {
+	display: block;
+}
+

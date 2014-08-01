@@ -15,6 +15,32 @@ elgg.provide('elgg.membersextender');
 
 // Init function
 elgg.membersextender.init = function() {
+	// Init hover
+	elgg.membersextender.initAvatarHover();
+
+	// Handle members tab display toggle in admin area
+	if ($('select[name="display_members_tab"]').length != 0) {
+		if ($('select[name="display_members_tab"]').val() == 0) {
+			$('input[name="member_subcategories"], input[name="member_subcategories[]"]').attr('DISABLED', 'DISABLED');
+		}
+
+		$('select[name="display_members_tab"]').change(function(event) {
+			if ($(this).val() == 1) {
+				$('.members-sub-categories-container').addClass('members-show-subcategories');
+				$('input[name="member_subcategories"], input[name="member_subcategories[]"]').removeAttr('DISABLED');
+			} else {
+				$('.members-sub-categories-container').removeClass('members-show-subcategories');
+				$('input[name="member_subcategories"], input[name="member_subcategories[]"]').attr('DISABLED', 'DISABLED');
+			}
+		});
+	}
+
+	// Init custom members navigation
+	$('.members-extender-main-nav').live('click', elgg.membersextender.mainNavClick);
+}
+
+// Init avatar hover
+elgg.membersextender.initAvatarHover = function() {
 	// Show/Hide user gallery hover info
 	$('.members-gallery-avatar').hover(elgg.membersextender.hoverGalleryAvatar, function() {
 		var $hoveravatar = $(this).data('hoveravatar');
@@ -22,6 +48,11 @@ elgg.membersextender.init = function() {
 			$hoveravatar.fadeOut();
 		}		
 	});
+}
+
+// Main nav click
+elgg.membersextender.mainNavClick = function(event) {
+	event.preventDefault();
 }
 
 // Members gallery hover event
@@ -66,4 +97,5 @@ elgg.membersextender.positionAchievements = function(hook, type, params, options
 
 elgg.register_hook_handler('init', 'system', elgg.membersextender.init);
 elgg.register_hook_handler('generic_populated', 'modules', elgg.membersextender.init);
+elgg.register_hook_handler('content_loaded', 'drilltrate', elgg.membersextender.initAvatarHover);
 elgg.register_hook_handler('setPopupLocation', 'achievements', elgg.membersextender.positionAchievements);
