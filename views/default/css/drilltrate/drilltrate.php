@@ -37,13 +37,23 @@
 	clear: both;
 }
 
-.drilltrate-menu-main.elgg-menu-filter li, 
-.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter li {
+.drilltrate-menu-main.elgg-menu-filter li {
 	margin: 0;
 	border: none;
 	border-left: 1px solid #444;
 	border-bottom: 1px solid #444;
 	border-top: 1px solid #444;
+}
+
+.drilltrate-menu-container .elgg-child-menu li {
+	font-size: 0.9em;
+	padding: 3px 10px 0 0;
+	text-transform: uppercase;
+}
+
+.drilltrate-menu-container .elgg-child-menu li.elgg-state-selected a {
+	text-decoration: underline;
+	font-weight: bold;
 }
 
 .drilltrate-menu-main.elgg-menu-filter li:last-child,
