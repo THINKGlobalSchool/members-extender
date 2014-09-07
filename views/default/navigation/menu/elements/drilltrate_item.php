@@ -31,7 +31,7 @@ if ($children) {
 
 	$children = elgg_view('navigation/menu/elements/drilltrate_section', array(
 		'items' => $children,
-		'class' => 'elgg-menu elgg-child-menu elgg-menu-filter elgg-menu-filter-default',
+		'class' => 'elgg-menu elgg-child-menu',
 		'parent_id' => $parent_id
 	));
 }
