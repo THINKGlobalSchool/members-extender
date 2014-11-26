@@ -315,10 +315,24 @@ elgg.provide('elgg.drilltrate');
 				$(this).insertAfter($('#' + $(this).data('parent-id')).parent());
 			});
 
+			// Handle generic togglers
+			self.find('.drilltrate-toggle').live('click', function(event) {
+				$(this).toggleClass('drilltrate-toggle-on').toggleClass('drilltrate-toggle-off');
+
+				if ($(this).hasClass('drilltrate-toggle-on')) {
+					$(this).html($(this).data('toggle-on-text'));
+					$(this).data('value', 0);
+				} else if ($(this).hasClass('drilltrate-toggle-off')) {
+					$(this).html($(this).data('toggle-off-text'));
+					$(this).data('value', 1);
+				}
+				event.preventDefault();
+			});
+
 			// Bind menu links
 			self.find('.drilltrate-menu-container li > a').live('click', function(event) {
 				var $_this = $(this);
-
+				console.log('clack');
 				self.find('[data-param="' + $(this).data('param') + '"]').each(function(idx) {
 
 					// Deactivate children
@@ -355,6 +369,7 @@ elgg.provide('elgg.drilltrate');
 
 			// Handle sort order clicks
 			self.find('.drilltrate-sort').live('click', function(event) {
+
 				$(this).toggleClass('descending').toggleClass('ascending');
 
 				if ($(this).hasClass('descending')) {

@@ -187,10 +187,12 @@ function members_extender_active_members_handler($hook, $type, $result, $params)
  */
 function members_extender_route_groups_handler($hook, $type, $return, $params) {
 	if (is_array($return['segments']) && $return['segments'][0] == 'members') {
-		// Use gallery view 
-		set_input('list_type', 'gallery');
+		// Determine which view we're using
+		$view = get_input('engagement') ? 'engagement' : 'gallery';
+		set_input('list_type', $view);
 		set_input('user_gallery_size', get_input('user_gallery_size', 'medium'));
 		set_input('limit', 28);
+		set_input('include_engagement', TRUE);
 		elgg_push_context('members_custom_avatar');
 	}
 	return $return;
@@ -288,6 +290,32 @@ function members_custom_menu_setup($hook, $type, $return, $params) {
 			$priority += 100;
 		}
 	}
+
+	if (get_input('engagement')) {
+		$en_value = 0;
+		$en_text = elgg_echo('members-extender:label:viewgallery');
+		$class = 'drilltrate-toggle-off';
+	} else {
+		$en_value = 1;
+		$en_text = elgg_echo('members-extender:label:viewengagement');
+		$class = 'drilltrate-toggle-on';
+	}
+
+	$options = array(
+		'name' => 'view-engagement',
+		'href' => '#',
+		'text' => $en_text,
+		'encode_text' => FALSE,
+		'class' => 'drilltrate-toggle ' . $class,
+		'data-toggle-on-text' => elgg_echo('members-extender:label:viewengagement'),
+		'data-toggle-off-text' => elgg_echo('members-extender:label:viewgallery'), 
+		'data-param' => 'engagement',
+		'data-value' => $en_value,
+		'section' => 'main',
+		'priority' => $priority += 1000
+	);
+
+	$return[] = ElggMenuItem::factory($options);
 
 	return $return;
 }

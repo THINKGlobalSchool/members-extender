@@ -44,7 +44,7 @@ function members_extender_get_custom_member_listing($page) {
  *
  * @return int
  */
-function members_extender_get_number_users($show_deactivated = false) {
+function members_extender_get_number_users($show_deactivated = FALSE) {
 	global $CONFIG;
 
 	$access = "";
@@ -80,7 +80,7 @@ function members_extender_get_number_users($show_deactivated = false) {
 		return $result->count;
 	}
 
-	return false;
+	return FALSE;
 }
 
 /**

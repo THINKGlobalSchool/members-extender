@@ -71,6 +71,63 @@
     top: 0 !important;
 }
 
+/** Engagement Link **/
+.members-view-engagment {
+	display: block;
+	text-align: right;
+}
+
+.elgg-menu-item-view-engagement,
+.elgg-menu-item-view-engagement:hover {
+	float: right !important;
+	background: none repeat scroll 0% 0% transparent !important;
+	border: 0px none !important;
+}
+
+.elgg-menu-item-view-engagement > a,
+.elgg-menu-filter > li.elgg-menu-item-view-engagement.elgg-state-selected > a {
+	color: #91131E !important;
+	text-transform: none !important;
+	font-family: "Lucida Grande",​Arial,​Tahoma,​Verdana,​sans-serif;
+	font-size: 1.1em;
+	background: none;
+}
+.elgg-menu-item-view-engagement > a:hover,
+.elgg-menu-filter > li.elgg-menu-item-view-engagement > a:hover {
+	color: #2D3F46 !important;
+    text-decoration: underline;
+    text-transform: none !important;
+	background: none !important;
+}
+
+/** Engagement Table **/
+.member-engagement-table {
+
+}
+
+.member-engagement-table th {
+	font-weight: bold;
+}
+
+.member-engagement-table td.member-engagement-avatar {
+	width: 25px;
+}
+
+.member-engagement-table td.member-engagement-link {
+
+}
+
+.member-engagement-table td.member-engagement-status.status-online {
+	font-weight: bold;
+	color: #347C17;
+}
+
+.member-engagement-table td.member-engagement-status.status-offline,
+.member-engagement-table td.empty-value {
+	color: #999;
+	font-style: italic;
+}
+
 /** Admin area **/
 .members-sub-categories-container {
 	display: none;
