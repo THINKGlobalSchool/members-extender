@@ -130,6 +130,7 @@
 
 .member-engagement-table td.member-engagement-post {
 	padding-top: 5px;
+	text-align: center;
 }
 
 .member-engagement-table tbody tr > td {

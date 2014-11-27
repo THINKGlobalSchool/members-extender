@@ -88,15 +88,13 @@ HTML;
 
 		$post_history_stats = members_extender_get_user_post_activity($item, FALSE, $last_week, $today);
 
-		elgg_dump($post_history_stats);
-
 		if (count($post_history_stats)) {
 			$posts = array();
 			foreach ($post_history_stats as $day => $count) {
 				$posts[] = $count;
 			}
 
-			$post_history = "<span class='bar hidden'>" . implode(',', $posts) . "</span>";
+			$post_history = "<span class='pchart hidden'>" . implode(',', $posts) . "</span>";
 			$post_class = '';
 		} else {
 			$post_class = 'empty-value';
@@ -126,10 +124,21 @@ HTML;
 					max: null,
 					min: 0,
 					padding: 0.1,
-					width: '100%'
+					width: '75%'
 				}
 
-				$(".bar").peity("bar");
+				$.fn.peity.defaults.line = {
+				  delimiter: ",",
+				  fill: "#D16269",
+				  height: 16,
+				  max: null,
+				  min: 0,
+				  stroke: "#85161d",
+				  strokeWidth: 1,
+				  width: '75%'
+				}
+
+				$(".pchart").peity("bar");
 			});
 		</script>
 JAVASCRIPT;
