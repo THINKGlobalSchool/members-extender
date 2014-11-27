@@ -23,7 +23,7 @@ function members_extender_init() {
 
 	// Register library
 	elgg_register_library('elgg:membersextender', elgg_get_plugins_path() . 'members-extender/lib/membersextender.php');
-
+	elgg_load_library('elgg:membersextender');
 	// Register members CSS
 	$m_css = elgg_get_simplecache_url('css', 'membersextender/css');
 	elgg_register_simplecache_view('css/membersextender/css');
@@ -51,6 +51,12 @@ function members_extender_init() {
 	$f_js = elgg_get_simplecache_url('js', 'drilltrate/utilities');
 	elgg_register_simplecache_view('js/drilltrate/utilities');
 	elgg_register_js('elgg.drilltrate.utilities', $f_js);
+
+	// Register piety JS
+	$p_js = elgg_get_simplecache_url('js', 'piety');
+	elgg_register_simplecache_view('js/piety');
+	elgg_register_js('piety', $p_js);
+	elgg_load_js('piety');
 
 	// Extend navigation/tabs view
 	//elgg_extend_view('navigation/tabs', 'members-extender/navigation/tabs', 0);

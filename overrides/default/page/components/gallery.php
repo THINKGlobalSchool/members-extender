@@ -83,6 +83,24 @@ HTML;
 			$last_login = elgg_echo('members-extender:stats:never');
 			$login_class = 'empty-value';
 		}
+		$today = time();
+		$last_week = strtotime("-7 days", $today);
+
+		$post_history_stats = members_extender_get_user_post_activity($item, FALSE, $last_week, $today);
+
+		elgg_dump($post_history_stats);
+
+		if (count($post_history_stats)) {
+			$posts = array();
+			foreach ($post_history_stats as $day => $count) {
+				$posts[] = $count;
+			}
+
+			$post_history = "<span class='bar hidden'>" . implode(',', $posts) . "</span>";
+			$post_class = '';
+		} else {
+			$post_class = 'empty-value';
+		}
 
 		$html .= <<<HTML
 			<tr>
@@ -91,13 +109,31 @@ HTML;
 				<td class='member-engagement-login $login_class'>$last_login</td>
 				$group_content
 				<td class='member-engagement-status status-$status'>$online_status</td>
-				<td class='member-engagement-post empty-value'>$post_history</td>
+				<td class='member-engagement-post $post_class'>$post_history</td>
 				<td class='member-engagement-view empty-value'>$view_history</td>
 			</tr>
 HTML;
 
 	}
 	$html .= '</tbody></table>';
+	$script = <<<JAVASCRIPT
+		<script type='text/javascript'>
+			$(document).ready(function() {
+				$.fn.peity.defaults.bar = {
+					delimiter: ",",
+					fill: ["#85161d"],
+					height: 16,
+					max: null,
+					min: 0,
+					padding: 0.1,
+					width: '100%'
+				}
+
+				$(".bar").peity("bar");
+			});
+		</script>
+JAVASCRIPT;
+	echo $script;
 }
 
 if (!$items) {

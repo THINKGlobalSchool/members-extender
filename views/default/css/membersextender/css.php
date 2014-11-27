@@ -128,6 +128,16 @@
 	font-style: italic;
 }
 
+.member-engagement-table td.member-engagement-post {
+	padding-top: 5px;
+}
+
+.member-engagement-table tbody tr > td {
+	vertical-align: middle;
+}
+
+
+
 /** Admin area **/
 .members-sub-categories-container {
 	display: none;

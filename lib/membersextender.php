@@ -106,3 +106,122 @@ function members_extender_get_exclude_parent_sql() {
 		return '';
 	}
 }
+
+/**
+ * Get member post activity (objects created) between given time period
+ *
+ * @param ElggUser $user
+ * @param int      $start Default: none
+ * @param int      $end   Default: none
+ * @return
+ */
+function members_extender_get_user_post_activity($user, $container = FALSE, $start = 0, $end = 0) {
+	// Sanity
+	if (!elgg_instanceof($user, 'user') || !is_int($start) || !is_int($end)) {
+		return FALSE;
+	}
+
+	// Exclude these subtypes by default
+	$exclude_subtypes = array(
+		get_subtype_id('object', 'messages'),
+		get_subtype_id('object', 'connected_blog_activity')
+	);
+
+	// Trigger a hook to modify exclusions
+	$hook_params = array(
+		'user' => $user,
+		'start' => $start,
+		'end' => $end
+	);
+
+	elgg_trigger_plugin_hook('analytics:exclude:subtypes', 'user', $hook_params, $exclude_subtypes);
+
+	if (count($exclude_subtypes)) {
+		$exclude_subtypes = implode(',', $exclude_subtypes);
+		$exclude_subtypes_sql = "AND e.subtype NOT IN ({$exclude_subtypes})";
+	}
+
+	$dbprefix = elgg_get_config('dbprefix');
+
+	// Start date sql if supplied
+	if ($start) {
+		$start_sql = "AND e.time_created > {$start}";
+	}
+
+	// End date sql if supplied
+	if ($end) {
+		$end_sql = "AND e.time_created < {$end}";
+	} else {
+		$end = time();
+	}
+
+	// Handler container-container objects (photos, pages)
+	$container_contained = array(
+		get_subtype_id('object', 'image'),
+		get_subtype_id('object', 'page')
+	);
+
+	// Let plugins add to this list
+	elgg_trigger_plugin_hook('analytics:container:contained', 'user', NULL, $container_contained);
+
+	// See if we supplied a container guid (groups)
+	if ($container && is_int($container)) {
+		// Need to check container contained entities, so throw in a join
+		$container_join = "JOIN {$dbprefix}entities ce on ce.guid = e.container_guid";
+		$container_sql = "AND (e.container_guid = {$container} OR ce.container_guid = {$container})";
+	}
+
+	// Direct SQL
+	$query = "SELECT count(e.guid) as post_count,
+	          FROM_UNIXTIME(e.time_created, '%Y-%m-%d') as post_day
+	          FROM {$dbprefix}entities e
+			  $container_join
+	          WHERE e.owner_guid = {$user->guid} 
+	          $start_sql 
+	          $end_sql 
+	          $exclude_subtypes_sql
+	          $container_sql
+	          GROUP BY post_day";
+
+	// Get data
+	$result = get_data($query, 'members_extender_activity_row_to_array');
+
+
+	// Build results array with dates/posts
+	$num_days = abs($start - $end)/60/60/24; // Determine number of days between timestat
+
+	// Build date array
+	$date_array = array();
+	for ($i = 1; $i <= $num_days; $i++) {
+		$dom = date('Y-m-d', strtotime("+{$i} day", $start)); // Day of month
+
+		// $dom_post_count = 
+		$post_count_by_dom = search_array_value_key($result, $dom);
+		$date_array[$dom] = $post_count_by_dom ? $post_count_by_dom : 0;
+	}
+
+	return $date_array;
+}
+
+/**
+ * Callback for get_data to convert activity rows to an array
+ */
+function members_extender_activity_row_to_array($row) {
+	return array($row->post_day => $row->post_count);
+}
+
+/**
+ * Handy multidimensional array key search function
+ * From: http://snipplr.com/view/55684/
+ *
+ * @param array $array 
+ * @param mixed $search
+ * @return mixed
+ */
+function search_array_value_key(array $array, $search) {
+	foreach (new RecursiveIteratorIterator(new RecursiveArrayIterator($array)) as $key => $value) {
+	    if ($search === $key)
+		return $value;
+	}
+	return false;
+}
