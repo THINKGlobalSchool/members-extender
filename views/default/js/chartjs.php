@@ -1,6 +1,6 @@
 <?php
 /**
- * Members-Extender piety js include
+ * Members-Extender chart.js include
  *
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
@@ -12,5 +12,5 @@
 
 
 $js_path = elgg_get_config('path');
-$p_js = "{$js_path}mod/members-extender/vendors/piety.js";
-include $p_js;
+$c_js = "{$js_path}mod/members-extender/vendors/chart.js";
+include $c_js;

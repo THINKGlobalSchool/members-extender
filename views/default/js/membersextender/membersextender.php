@@ -39,6 +39,42 @@ elgg.membersextender.init = function() {
 	$('.members-extender-main-nav').live('click', elgg.membersextender.mainNavClick);
 }
 
+// Init chart.js
+elgg.membersextender.initCharts = function() {
+	$('.post-chart').each(function(idx) {
+		var context = this.getContext("2d");
+		
+		this.style.width='100%';
+		this.width  = this.offsetWidth;
+
+		var data = {
+		    labels: $(this).data('labels'),
+		    datasets: [
+		        {
+		            fillColor: "rgba(130,21,26,0.8)",
+		            strokeColor: "rgba(130,21,26,0.8)",
+		            highlightFill: "rgba(130,21,26,1)",
+		            data: $(this).data('values')
+		        }
+		    ]
+		};
+
+		var chart = new Chart(context).Bar(data, elgg.membersextender.activity_options);
+	});
+}
+
+// Chart.js options 
+elgg.membersextender.activity_options = {
+	scaleShowLabels: false,
+	scaleShowGridLines: false,
+	barShowStroke: false,
+	barValueSpacing: 2,
+	barDatasetSpacing: 1,
+	tooltipFontSize: 12,
+	// New option because apparently hiding the scale doesn't hide the lines..
+	hideTheDamnYScale: true
+};
+
 // Init avatar hover
 elgg.membersextender.initAvatarHover = function() {
 	// Show/Hide user gallery hover info

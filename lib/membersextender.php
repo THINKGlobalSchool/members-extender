@@ -124,7 +124,8 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	// Exclude these subtypes by default
 	$exclude_subtypes = array(
 		get_subtype_id('object', 'messages'),
-		get_subtype_id('object', 'connected_blog_activity')
+		get_subtype_id('object', 'connected_blog_activity'),
+		get_subtype_id('object', 'tidypics_batch')
 	);
 
 	// Trigger a hook to modify exclusions
@@ -165,7 +166,8 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	elgg_trigger_plugin_hook('analytics:container:contained', 'user', NULL, $container_contained);
 
 	// See if we supplied a container guid (groups)
-	if ($container && is_int($container)) {
+	$container = (int)$container;
+	if ($container) {
 		// Need to check container contained entities, so throw in a join
 		$container_join = "JOIN {$dbprefix}entities ce on ce.guid = e.container_guid";
 		$container_sql = "AND (e.container_guid = {$container} OR ce.container_guid = {$container})";
@@ -177,6 +179,7 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	          FROM {$dbprefix}entities e
 			  $container_join
 	          WHERE e.owner_guid = {$user->guid} 
+	          AND e.type = 'object'
 	          $start_sql 
 	          $end_sql 
 	          $exclude_subtypes_sql

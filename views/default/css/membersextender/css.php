@@ -128,7 +128,9 @@
 	font-style: italic;
 }
 
-.member-engagement-table td.member-engagement-post {
+.member-engagement-table td.member-engagement-post,
+.member-engagement-table td.member-engagement-view {
+	width: 24%;
 	padding-top: 5px;
 	text-align: center;
 }

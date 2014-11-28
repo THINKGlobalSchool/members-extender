@@ -77,7 +77,7 @@ HTML;
 
 		// Last login
 		if ($item->last_login) {
-			$last_login = date("F j, Y", $item->last_login);
+			$last_login = date("d/m/y", $item->last_login);
 			$login_class = '';
 		} else {
 			$last_login = elgg_echo('members-extender:stats:never');
@@ -86,15 +86,19 @@ HTML;
 		$today = time();
 		$last_week = strtotime("-7 days", $today);
 
-		$post_history_stats = members_extender_get_user_post_activity($item, FALSE, $last_week, $today);
+		$post_history_stats = members_extender_get_user_post_activity($item, elgg_get_page_owner_guid(), $last_week, $today);
 
 		if (count($post_history_stats)) {
 			$posts = array();
-			foreach ($post_history_stats as $day => $count) {
-				$posts[] = $count;
+			foreach ($post_history_stats as $date => $count) {
+				$posts[date('d',strtotime($date))] = $count;
 			}
 
-			$post_history = "<span class='pchart hidden'>" . implode(',', $posts) . "</span>";
+			$labels = json_encode(array_keys($posts));
+			$values = json_encode(array_values($posts));
+
+			$post_history = "<canvas data-labels={$labels} data-values={$values} class='post-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+
 			$post_class = '';
 		} else {
 			$post_class = 'empty-value';
@@ -116,29 +120,8 @@ HTML;
 	$html .= '</tbody></table>';
 	$script = <<<JAVASCRIPT
 		<script type='text/javascript'>
-			$(document).ready(function() {
-				$.fn.peity.defaults.bar = {
-					delimiter: ",",
-					fill: ["#85161d"],
-					height: 16,
-					max: null,
-					min: 0,
-					padding: 0.1,
-					width: '75%'
-				}
-
-				$.fn.peity.defaults.line = {
-				  delimiter: ",",
-				  fill: "#D16269",
-				  height: 16,
-				  max: null,
-				  min: 0,
-				  stroke: "#85161d",
-				  strokeWidth: 1,
-				  width: '75%'
-				}
-
-				$(".pchart").peity("bar");
+			elgg.register_hook_handler('init', 'system', function() {
+				elgg.membersextender.initCharts();
 			});
 		</script>
 JAVASCRIPT;
