@@ -47,7 +47,6 @@ if (is_array($items) && count($items) > 0) {
 	$page_owner = elgg_get_page_owner_entity();
 	if (elgg_instanceof($page_owner, 'group')) {
 		$group_header = "<th>$group_h</th>";
-		$group_content = "<td class='member-engagement-group empty-value'>$group_access</td>";
 	}
 
 	$html .= <<<HTML
@@ -87,6 +86,29 @@ HTML;
 		// Time frames for view/post stats
 		$today = time();
 		$last_week = strtotime("-7 days", $today);
+
+		if (elgg_instanceof($page_owner, 'group')) {
+			$group_views = members_extender_get_user_views(array(
+				'types' => array('group'),
+				'view_user_guid' => $item->guid,
+				'view_time_lower' => 0,
+				'view_time_upper' => $today
+			));
+
+			usort($group_views, function($a, $b) {
+				return $b['Time'] - $a['Time'];
+			});
+
+			if (!empty($group_views)) {
+				$group_access = date("d/m/y", $group_views[0]['Time']);
+				$group_class = '';
+			} else {
+				$group_access = elgg_echo('members-extender:stats:never');
+				$group_class = "empty-value";
+			}
+
+			$group_content = "<td class='member-engagement-group $group_class'>$group_access</td>";
+		}
 
 		// Get post stats
 		$post_history_stats = members_extender_get_user_post_activity($item, elgg_get_page_owner_guid(), $last_week, $today);

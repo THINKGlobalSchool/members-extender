@@ -527,6 +527,10 @@ function members_extender_run_query($client, array $options = array()) {
 function members_extender_get_user_views_by_date(array $options = array()) {
 	$views = members_extender_get_user_views($options);
 
+	usort($views, function($a, $b) {
+		return $a['Time'] - $b['Time'];
+	});
+
 	$start = $options['view_time_lower'];
 	$end = $options['view_time_upper'];
 
