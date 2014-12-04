@@ -135,7 +135,7 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 		'end' => $end
 	);
 
-	elgg_trigger_plugin_hook('analytics:exclude:subtypes', 'user', $hook_params, $exclude_subtypes);
+	$exclude_subtypes = elgg_trigger_plugin_hook('analytics:exclude:subtypes', 'userpost', $hook_params, $exclude_subtypes);
 
 	if (count($exclude_subtypes)) {
 		$exclude_subtypes = implode(',', $exclude_subtypes);
@@ -158,12 +158,11 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 
 	// Handler container-container objects (photos, pages)
 	$container_contained = array(
-		get_subtype_id('object', 'image'),
-		get_subtype_id('object', 'page')
+		get_subtype_id('object', 'image')
 	);
 
 	// Let plugins add to this list
-	elgg_trigger_plugin_hook('analytics:container:contained', 'user', NULL, $container_contained);
+	$container_contained = elgg_trigger_plugin_hook('analytics:container:contained', 'userpost', NULL, $container_contained);
 
 	// See if we supplied a container guid (groups)
 	$container = (int)$container;
@@ -197,8 +196,6 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	$date_array = array();
 	for ($i = 1; $i <= $num_days; $i++) {
 		$dom = date('Y-m-d', strtotime("+{$i} day", $start)); // Day of month
-
-		// $dom_post_count = 
 		$post_count_by_dom = search_array_value_key($result, $dom);
 		$date_array[$dom] = $post_count_by_dom ? $post_count_by_dom : 0;
 	}
@@ -227,4 +224,340 @@ function search_array_value_key(array $array, $search) {
 		return $value;
 	}
 	return false;
+}
+
+/**
+ * Add a user view to the spot views dynanmodb
+ * 
+ * 'Schema' (as far as nosql goes..)
+ *
+ * Hash key  : UserId
+ * Range key : Time
+ * 
+ * Other fields (required)
+ *
+ * ObjectId            => ElggObject->guid
+ * ObjectContainerId   => ElggObject->container_guid (or container of container guid)
+ * ObjectOwnerId       => ElggObject->owner_guid
+ * ObjectType          => ElggObject->getType()
+ * ObjectSubtype       => ElggObject->getSubtype()
+ * ObjectCreated       => ElggObject->time_created
+ * ObjectUpdated       => ElggObject->time_updated
+ */
+function members_extender_add_user_view($user, $object) {
+	// Check for valid entities
+	if (!elgg_instanceof($user, 'user') || (!elgg_instanceof($object, 'group') && !elgg_instanceof($object, 'object'))) {
+		return FALSE;
+	}
+
+	$client = get_dynamo_db_client();
+
+	// Need to handle container contained subtypes
+	$container_contained = array(
+		'image'
+	);
+
+	// Trigger a hook
+	$container_contained = elgg_trigger_plugin_hook('analytics:container:contained', 'userview', NULL, $container_contained);
+
+	// Get container->contained_guid
+	if (in_array($object->getSubtype(), $container_contained)) {
+		$container_guid = $object->getContainerEntity()->container_guid;
+	} else {
+		$container_guid = $object->container_guid;
+	}
+
+	$time = time();
+
+	// Create item
+	$item = array(
+		"UserId" => $client->formatValue((int)$user->guid),
+		"ObjectId" => $client->formatValue((int)$object->guid),
+		"ObjectContainerId" => $client->formatValue((int)$container_guid),
+		"ObjectOwnerId" => $client->formatValue((int)$object->owner_guid),
+		"ObjectType" => $client->formatValue($object->getType()),
+		"ObjectSubtype" => $client->formatValue($object->getSubtype()),
+		"ObjectCreated" => $client->formatValue((int)$object->time_created),
+		"ObjectUpdated" => $client->formatValue((int)$object->time_updated),
+		"Time" => $client->formatValue($time)
+	);
+
+	// Insert!
+	$client->putItem(array(
+		'TableName' => elgg_get_plugin_setting('awsaccessdbtable', 'members-extender'),
+		'Item' => $item
+	));
+}
+
+/**
+ * Get a specific users views
+ *
+ * @param $options
+ * 
+ * Available options:
+ *
+ * 	'types'					=>	Object Types (ie: object, group)
+ *	'subtypes'				=>	Object Subtypes (ie: blog, page)
+ *	'guids'					=>	Object Guids
+ *	'owner_guids'			=>	Object Owner guids
+ *	'container_guids'		=>	Object Container guids (ie: group->guid)
+ *	'modified_time_lower'	=>	Modified timestamp lower range
+ *	'modified_time_upper'	=>	Modified timestamp upper ranges
+ *	'created_time_lower'	=>	Created timestamp lower range
+ *	'created_time_upper'	=>	Created timestamp upper range
+ *	'view_time_lower'       =>  View timestamp lower range (part of dynamodb range key)
+ *	'view_time_upper'       =>  View timestamp upper range (part of dynamodb range key)
+ *
+ * REQUIRED!!
+ *  'view_user_guids'       =>  At least one user guid (HASH KEY!)
+ * 
+ * @return mixed
+ */
+function members_extender_get_user_views(array $options = array()) {
+	// Default options
+	$defaults = array(
+		'types'					=>	ELGG_ENTITIES_ANY_VALUE,
+		'subtypes'				=>	ELGG_ENTITIES_ANY_VALUE,
+		'guids'					=>	ELGG_ENTITIES_ANY_VALUE,
+		'owner_guids'			=>	ELGG_ENTITIES_ANY_VALUE,
+		'container_guids'		=>	ELGG_ENTITIES_ANY_VALUE,
+		'modified_time_lower'	=>	0,
+		'modified_time_upper'	=>	ELGG_ENTITIES_ANY_VALUE,
+		'created_time_lower'	=>	0,
+		'created_time_upper'	=>	ELGG_ENTITIES_ANY_VALUE,
+		'view_time_lower'       =>  0,
+		'view_time_upper'       =>  ELGG_ENTITIES_ANY_VALUE,
+	);
+
+	// Elgg -> Dynamo Mapping
+	$field_mapping = array(
+		'types'					=>	'ObjectType',
+		'subtypes'				=>	'ObjectSubtype',
+		'guids'					=>	'ObjectId',
+		'owner_guids'			=>	'ObjectOwnerId',
+		'container_guids'		=>	'ObjectContainerId',
+		'modified_time_lower'	=>	'ObjectUpdated',
+		'modified_time_upper'	=>	'ObjectUpdated',
+		'created_time_lower'	=>	'ObjectCreated',
+		'created_time_upper'	=>	'ObjectCreated',
+	);
+
+	$options = array_merge($defaults, $options);
+	$singulars = array('type', 'subtype', 'guid', 'owner_guid', 'container_guid', 'view_user_guid');
+	$options = elgg_normalise_plural_options_array($options, $singulars);
+
+	if (empty($options['view_user_guids'])) {
+		return FALSE; // Need at least one user guid to query against
+	}
+
+	// Grab a client
+	$client = get_dynamo_db_client();
+
+	// Check view user guids
+	$view_user_attrs = array();
+	foreach ($options['view_user_guids'] as $idx => $user) {
+		if (!elgg_instanceof(get_entity($user), 'user')) {
+			unset($options['view_user_guids'][$idx]);
+		} else {
+			$view_user_attrs[] = $client->formatValue($user);
+		}
+	}
+
+	// Start building key conditions
+	$key_conditions = array(
+		"UserId" => array(
+			"ComparisonOperator" => 'EQ',
+			"AttributeValueList" => $view_user_attrs
+		)
+	);
+
+	// Add lower view time
+	$time_attrs = array(
+		$client->formatValue($options['view_time_lower'])
+	);
+
+	// If view upper is supplied change comparison and add attribute
+	if ($options['view_time_upper']) {
+		$time_comparison = "BETWEEN";
+		$time_attrs[] = $client->formatValue($options['view_time_upper']);
+	} else {
+		$time_comparison = "GT";
+	}
+
+	// Put together view time key conditions
+	$key_conditions["Time"] = array(
+		"ComparisonOperator" => $time_comparison,
+		"AttributeValueList" => $time_attrs
+	);
+
+	// Unset hash key options
+	unset($options['view_user_guids']);
+	unset($options['view_time_lower']);
+	unset($options['view_time_upper']);
+
+	// Begin building filter expression and attributes
+	$expression_attrs = array();
+	$filter_expressions = array();
+
+	// Loop over options and process into query dynamodbexpressions/attributes
+	foreach ($options as $key => $value) {
+		// All array values will be treated as 'in' queries
+		if (is_array($value)) {
+			$expression_placeholders = array();
+			foreach ($value as $idx => $sub_value) {
+				if ($sub_value !== NULL && $field_mapping[$key]) {
+					// Cast values to int where needed
+					if (is_numeric($sub_value)) {
+						$sub_value = (int)$sub_value;
+					}
+
+					$expression_attrs[":{$key}{$idx}"] = $client->formatValue($sub_value);
+					$expression_placeholders[] = ":{$key}{$idx}";
+				}
+			}
+			if ($field_mapping[$key]) {
+				$expr_str = implode(',', $expression_placeholders);
+				$filter_expressions[] = "({$field_mapping[$key]} in ({$expr_str}))";
+			}
+		} else {
+			if ($value !== NULL && $field_mapping[$key]) {
+				if ($key == 'created_time_lower' && $options['created_time_upper'] !== NULL) {
+					$filter_expressions[] = "({$field_mapping[$key]} between :created_time_lower and :created_time_upper)";
+				} else if ($key == 'created_time_lower' && $options['create_time_upper'] === NULL) {
+					$filter_expressions[] = "({$field_mapping[$key]} > :created_time_lower)";
+				} else if ($key == 'modified_time_lower' && $options['modified_time_upper'] !== NULL) {
+					$filter_expressions[] = "({$field_mapping[$key]} between :modified_time_lower and :modified_time_upper)";
+				} else if ($key == 'modified_time_lower' && $options['modified_time_upper'] === NULL) {
+					$filter_expressions[] = "({$field_mapping[$key]} > :modified_time_lower)";
+				} else if ($field_mapping[$key]) { // For future use.. just include: key => value
+					$filter_expressions[] = "({$field_mapping[$key]} = :{$key})";
+				}
+
+				if (is_numeric($value)) {
+					$expression_attrs[":{$key}"] = $client->formatValue((int)$value);
+				} else {
+					$expression_attrs[":{$key}"] = $client->formatValue($value);
+				}
+			}
+		}
+	}
+
+	// Create expression string
+	$filter_expressions_str = implode(' and ', $filter_expressions);
+
+	// Expression attribute names (for reserved/other fields)
+	$expression_attr_names = array('#time' => 'Time');
+
+	$items = members_extender_run_query($client, array(
+		"TableName" => elgg_get_plugin_setting('awsaccessdbtable', 'members-extender'),
+		"KeyConditions" => $key_conditions,
+		"FilterExpression" => $filter_expressions_str,
+		"ExpressionAttributeNames" => $expression_attr_names,
+		"ExpressionAttributeValues" => $expression_attrs,
+		"ProjectionExpression" => "#time, ObjectId, ObjectSubtype, ObjectType"
+	));
+
+	return $items;
+}
+
+/**
+ * Run a query on the dynamodb
+ *
+ * @param  $client  DynamoDBClient
+ * @param  $options Query options
+ * @return array|bool
+ */
+function members_extender_run_query($client, array $options = array()) {
+	// Default options
+	$defaults = array(
+		'callback' =>  'members_extender_view_items_callback'
+	);
+
+	$options = array_merge($defaults, $options);
+
+	// Check required fields
+	$required = array(
+		'TableName', 'KeyConditions'
+	);
+
+	foreach ($required as $r) {
+		if (!array_key_exists($r, $options)) {
+			return FALSE;
+		}
+	}
+
+	// Run query
+	$response = $client->query($options);
+
+	$callback = $options['callback'];
+
+	$is_callable = is_callable($callback);
+
+	foreach ($response['Items'] as $item) {
+		if ($is_callable) {
+			$return[] = $callback($item);
+		} else {
+			$return[] = $item;
+		}
+	}
+
+	if (!is_array($return)) {
+		$return = array();
+	}
+
+	// Check if we've run into a result set limit
+	if (is_array($response['LastEvaluatedKey'])) {
+		// Got last evaluated key (not all matching items were returned), so include the last key as the 
+		// start key
+		$options['ExclusiveStartKey'] = $response['LastEvaluatedKey'];
+
+		// Run'er again
+		$return = array_merge_recursive(members_extender_run_query($client, $options), $return);
+	}
+
+	return $return;
+}
+
+/**
+ * Get user user views formatted as date => view_count
+ *
+ * @param  $options Query options (see: members_extender_run_query)
+ * @return array
+ */
+function members_extender_get_user_views_by_date(array $options = array()) {
+	$views = members_extender_get_user_views($options);
+
+	$start = $options['view_time_lower'];
+	$end = $options['view_time_upper'];
+
+	$num_days = abs($start - $end)/60/60/24; // Determine number of days between times
+
+	// Build date => view count array
+	$views_by_date = array();
+
+	foreach ($views as $view) {
+		$views_by_date[date('Y-m-d', $view['Time'])] += 1;
+	}
+
+	$date_array = array();
+	for ($i = 1; $i <= $num_days; $i++) {
+		$dom = date('Y-m-d', strtotime("+{$i} day", $start)); // Day of month
+		$post_count_by_dom = search_array_value_key($views_by_date, $dom);
+		$date_array[$dom] = $post_count_by_dom ? $post_count_by_dom : 0;
+	}
+
+	return $date_array;
+}
+
+/**
+ * Dynamodb view items callback
+ * 
+ * Formats items as key => value (strips out the dynamodb formatting, ie: 'N' => xyz) 
+ */
+function members_extender_view_items_callback($item) {
+	$return = array();
+	foreach ($item as $key => $val) {
+		$return[$key] = reset($val); // reset() is sweet (set array pointer to first item)
+	}
+	return $return;
 }

@@ -83,9 +83,12 @@ HTML;
 			$last_login = elgg_echo('members-extender:stats:never');
 			$login_class = 'empty-value';
 		}
+
+		// Time frames for view/post stats
 		$today = time();
 		$last_week = strtotime("-7 days", $today);
 
+		// Get post stats
 		$post_history_stats = members_extender_get_user_post_activity($item, elgg_get_page_owner_guid(), $last_week, $today);
 
 		if (count($post_history_stats)) {
@@ -104,6 +107,32 @@ HTML;
 			$post_class = 'empty-value';
 		}
 
+		$view_history_stats = members_extender_get_user_views_by_date(array(
+			'types' => array('object'),
+			'container_guid' => elgg_get_page_owner_guid(),
+			'view_user_guid' => $item->guid,
+			'view_time_lower' => $last_week,
+			'view_time_upper' => $today
+		));
+
+		if (count($view_history_stats)) {
+			$views = array();
+			foreach ($view_history_stats as $date => $count) {
+				$views[date('d',strtotime($date))] = $count;
+			}
+
+			$labels = json_encode(array_keys($views));
+			$values = json_encode(array_values($views));
+
+			$view_history = "<canvas data-labels={$labels} data-values={$values} class='post-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+
+			$view_class = '';
+
+		} else {
+			$view_class = 'empty-value';
+		}
+
+		// Stats table row
 		$html .= <<<HTML
 			<tr>
 				<td class='member-engagement-avatar'>$icon</td>
@@ -112,7 +141,7 @@ HTML;
 				$group_content
 				<td class='member-engagement-status status-$status'>$online_status</td>
 				<td class='member-engagement-post $post_class'>$post_history</td>
-				<td class='member-engagement-view empty-value'>$view_history</td>
+				<td class='member-engagement-view $view_class'>$view_history</td>
 			</tr>
 HTML;
 

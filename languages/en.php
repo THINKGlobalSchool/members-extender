@@ -19,6 +19,10 @@ $english = array(
 	'members-extender:label:subcategories' => 'Sub categories (roles) for advanced filtering on members page',
 	'members-extender:label:viewengagement' => 'View Engagement',
 	'members-extender:label:viewgallery' => 'View Gallery',
+	'members-extender:label:awsaccesskey' => 'AWS Access Key',
+	'members-extender:label:awsaccesssecret' => 'AWS Access Secret',
+	'members-extender:label:awsaccessregion' => 'AWS Region (ie: us-east-1)',
+	'members-extender:label:awsaccessdbtable' => 'AWS DynamoDB table',
 
 	// Stats
 	'members-extender:stats:user' => 'User',

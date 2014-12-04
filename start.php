@@ -15,15 +15,21 @@
 
 // Register init
 elgg_register_event_handler('init', 'system', 'members_extender_init');
+elgg_register_event_handler('pagesetup', 'system', 'members_extender_pagesetup');
+
+// Load AWS SDK
+elgg_register_library('awssdk', elgg_get_plugins_path() . 'members-extender/lib/awsengine.php');
+elgg_load_library('awssdk');
 
 // Init
 function members_extender_init() {
 
 	define('MEMBERS_SUB_CATEGORY_RELATIONSHIP', 'is_member_subcategory_for');
 
-	// Register library
+	// Register plugin library
 	elgg_register_library('elgg:membersextender', elgg_get_plugins_path() . 'members-extender/lib/membersextender.php');
 	elgg_load_library('elgg:membersextender');
+
 	// Register members CSS
 	$m_css = elgg_get_simplecache_url('css', 'membersextender/css');
 	elgg_register_simplecache_view('css/membersextender/css');
@@ -73,11 +79,17 @@ function members_extender_init() {
 	// Extend roles form
 	elgg_extend_view('forms/roles/edit/extend', 'members-extender/role_form');
 
+	// Extend owner block for group view tracking
+	elgg_extend_view('page/elements/owner_block', 'members-extender/owner_block');
+
 	// Hook into find_active_users hook to ignore banned and optionally parent users
 	elgg_register_plugin_hook_handler('find_active_users', 'system', 'members_extender_active_members_handler');
 
 	// Extend groups page handler
 	elgg_register_plugin_hook_handler('route', 'groups', 'members_extender_route_groups_handler', 50);
+
+	// Register hook handler to add a full_view kind of context to all views
+	elgg_register_plugin_hook_handler('view', 'all', 'members_extender_entity_full_view_handler');
 
 	// Hook into create/update events to save roles for an entity
 	elgg_register_event_handler('update', 'object', 'members_extender_roles_save_members_tab');
@@ -100,6 +112,23 @@ function members_extender_init() {
 
 	// Whitelist ajax views
 	elgg_register_ajax_view('members-extender/list');
+}
+
+/**
+ * Memebers extender pagesetup
+ */
+function members_extender_pagesetup() {
+	// Register extra views to extend for edge-case view tracking
+	// NOTE: These views should have the entity we're looking to track available in $vars['entity']
+	$views = array(
+		'object/image/lightbox'
+	);
+
+	$views = elgg_trigger_plugin_hook('analytics:include:views', 'userview', array(), $views);
+
+	foreach ($views as $view) {
+		elgg_extend_view($view, 'members-extender/track');
+	}
 }
 
 /**
@@ -200,6 +229,60 @@ function members_extender_route_groups_handler($hook, $type, $return, $params) {
 		set_input('limit', 28);
 		set_input('include_engagement', TRUE);
 		elgg_push_context('members_custom_avatar');
+	}
+	return $return;
+}
+
+/**
+ * Post process object views to record view stats
+ *
+ * @param unknown_type $hook
+ * @param unknown_type $type
+ * @param unknown_type $return
+ * @param unknown_type $params
+ * @return unknown
+ */
+function members_extender_entity_full_view_handler($hook, $type, $return, $params) {
+	if (!elgg_is_logged_in() || elgg_get_viewtype() != "default" || elgg_in_context('admin') || elgg_in_context('ajax')) {
+		return;
+	}
+
+	// Only dealing with straight up object views here
+	if (strpos($params['view'], 'object/') === 0                  // Check that view is an object view
+		&& isset($params['vars']['entity'])                       // Make sure we have an entity
+		&& strpos($params['view'], 'object/elements') !== 0       // Ignore object/elements views
+		&& $params['vars']['full_view']) {                        // Check for full view
+
+		// Double check entity
+		if (!elgg_instanceof($params['vars']['entity'], 'object')) {
+			return $return;
+		}
+
+		// Exclude certain entities
+		$exclusions = array(
+			'feedback',
+			'forum',
+			'forum_topic',
+			//'forum_reply',
+			//'poll',
+			'messages',
+			'plugin',
+		);
+
+		// Throw a hook for plugins to modify exlusions
+		$exclusions = elgg_trigger_plugin_hook('analytics:exclude:subtypes', 'userview', array('entity' => $params['vars']['entity']), $exclusions);
+
+		if (in_array($params['vars']['entity']->getSubtype(), $exlusions)) {
+			return $return;
+		}
+
+		// Make sure we only trigger the view once per page
+		if (!get_input('trigger-view-stat')) {
+			set_input('trigger-view-stat', TRUE);
+			//elgg_dump('TRIGGERING VIEW FOR ' . $params['vars']['entity']->guid);
+			members_extender_add_user_view(elgg_get_logged_in_user_entity(), $params['vars']['entity']);
+		}
+
 	}
 	return $return;
 }
