@@ -363,6 +363,17 @@ function members_extender_get_user_views(array $options = array()) {
 		}
 	}
 
+	// Check for a valid container guids
+	foreach ($options['container_guids'] as $idx => $container) {
+		if (!$container) {
+			unset($options['container_guids'][$idx]);
+		}
+	}
+
+	if (empty($options['container_guids'])) {
+		unset($options['container_guids']);
+	}
+
 	// Start building key conditions
 	$key_conditions = array(
 		"UserId" => array(
