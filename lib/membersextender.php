@@ -267,7 +267,9 @@ function members_extender_add_user_view($user, $object) {
 		$container_guid = $object->container_guid;
 	}
 
-	$time = time();
+	$time = round(microtime(true)*1000);
+
+//	elgg_dump($time);
 
 	// Create item
 	$item = array(
@@ -279,7 +281,7 @@ function members_extender_add_user_view($user, $object) {
 		"ObjectSubtype" => $client->formatValue($object->getSubtype()),
 		"ObjectCreated" => $client->formatValue((int)$object->time_created),
 		"ObjectUpdated" => $client->formatValue((int)$object->time_updated),
-		"Time" => $client->formatValue($time)
+		"Time" => $client->formatValue((int)$time)
 	);
 
 	// Insert!
@@ -544,8 +546,8 @@ function members_extender_get_user_views_by_date(array $options = array()) {
 		return $a['Time'] - $b['Time'];
 	});
 
-	$start = $options['view_time_lower'];
-	$end = $options['view_time_upper'];
+	$start = round($options['view_time_lower'] / 1000);
+	$end = round($options['view_time_upper'] / 1000);
 
 	$num_days = abs($start - $end)/60/60/24; // Determine number of days between times
 
@@ -553,7 +555,7 @@ function members_extender_get_user_views_by_date(array $options = array()) {
 	$views_by_date = array();
 
 	foreach ($views as $view) {
-		$views_by_date[date('Y-m-d', $view['Time'])] += 1;
+		$views_by_date[date('Y-m-d', round($view['Time']/1000))] += 1;
 	}
 
 	$date_array = array();

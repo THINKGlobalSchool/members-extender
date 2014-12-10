@@ -86,6 +86,8 @@ HTML;
 		// Time frames for view/post stats
 		$today = time();
 		$last_week = strtotime("-7 days", $today);
+		$last_week_ms = $last_week * 1000;
+		$today_ms = $today * 1000;
 
 		if (elgg_instanceof($page_owner, 'group')) {
 			$group_views = members_extender_get_user_views(array(
@@ -93,7 +95,7 @@ HTML;
 				'view_user_guid' => $item->guid,
 				'guid' => $page_owner->guid,
 				'view_time_lower' => 0,
-				'view_time_upper' => $today
+				'view_time_upper' => $today_ms
 			));
 
 			usort($group_views, function($a, $b) {
@@ -101,7 +103,7 @@ HTML;
 			});
 
 			if (!empty($group_views)) {
-				$group_access = date("d/m/y", $group_views[0]['Time']);
+				$group_access = date("d/m/y", round($group_views[0]['Time'] / 1000));
 				$group_class = '';
 			} else {
 				$group_access = elgg_echo('members-extender:stats:never');
@@ -134,8 +136,8 @@ HTML;
 			'types' => array('object'),
 			'container_guid' => elgg_get_page_owner_guid(),
 			'view_user_guid' => $item->guid,
-			'view_time_lower' => $last_week,
-			'view_time_upper' => $today
+			'view_time_lower' => $last_week_ms,
+			'view_time_upper' => $today_ms
 		));
 
 		if (count($view_history_stats)) {
