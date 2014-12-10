@@ -380,31 +380,33 @@ function members_custom_menu_setup($hook, $type, $return, $params) {
 		}
 	}
 
-	if (get_input('engagement')) {
-		$en_value = 0;
-		$en_text = elgg_echo('members-extender:label:viewgallery');
-		$class = 'drilltrate-toggle-off';
-	} else {
-		$en_value = 1;
-		$en_text = elgg_echo('members-extender:label:viewengagement');
-		$class = 'drilltrate-toggle-on';
+	if (elgg_is_admin_logged_in()) {
+		if (get_input('engagement')) {
+			$en_value = 0;
+			$en_text = elgg_echo('members-extender:label:viewgallery');
+			$class = 'drilltrate-toggle-off';
+		} else {
+			$en_value = 1;
+			$en_text = elgg_echo('members-extender:label:viewengagement');
+			$class = 'drilltrate-toggle-on';
+		}
+
+		$options = array(
+			'name' => 'view-engagement',
+			'href' => '#',
+			'text' => $en_text,
+			'encode_text' => FALSE,
+			'class' => 'drilltrate-toggle ' . $class,
+			'data-toggle-on-text' => elgg_echo('members-extender:label:viewengagement'),
+			'data-toggle-off-text' => elgg_echo('members-extender:label:viewgallery'), 
+			'data-param' => 'engagement',
+			'data-value' => $en_value,
+			'section' => 'main',
+			'priority' => $priority += 1000
+		);
+
+		$return[] = ElggMenuItem::factory($options);
 	}
-
-	$options = array(
-		'name' => 'view-engagement',
-		'href' => '#',
-		'text' => $en_text,
-		'encode_text' => FALSE,
-		'class' => 'drilltrate-toggle ' . $class,
-		'data-toggle-on-text' => elgg_echo('members-extender:label:viewengagement'),
-		'data-toggle-off-text' => elgg_echo('members-extender:label:viewgallery'), 
-		'data-param' => 'engagement',
-		'data-value' => $en_value,
-		'section' => 'main',
-		'priority' => $priority += 1000
-	);
-
-	$return[] = ElggMenuItem::factory($options);
 
 	return $return;
 }
