@@ -91,6 +91,7 @@ HTML;
 			$group_views = members_extender_get_user_views(array(
 				'types' => array('group'),
 				'view_user_guid' => $item->guid,
+				'guid' => $page_owner->guid,
 				'view_time_lower' => 0,
 				'view_time_upper' => $today
 			));
