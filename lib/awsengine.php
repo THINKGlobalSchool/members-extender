@@ -17,7 +17,7 @@ use Aws\DynamoDb\Enum\ComparisonOperator;
 
 global $dynamodbclient;
 
-function get_dynamo_db_client($dblinktype) {
+function get_dynamo_db_client() {
 	global $dynamodbclient;
 	if (!$dynamodbclient) {
 		$dynamodbclient = DynamoDbClient::factory(array(

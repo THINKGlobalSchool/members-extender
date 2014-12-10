@@ -272,7 +272,7 @@ function members_extender_entity_full_view_handler($hook, $type, $return, $param
 		// Throw a hook for plugins to modify exlusions
 		$exclusions = elgg_trigger_plugin_hook('analytics:exclude:subtypes', 'userview', array('entity' => $params['vars']['entity']), $exclusions);
 
-		if (in_array($params['vars']['entity']->getSubtype(), $exlusions)) {
+		if (in_array($params['vars']['entity']->getSubtype(), $exclusions)) {
 			return $return;
 		}
 
