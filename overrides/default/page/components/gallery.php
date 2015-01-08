@@ -153,14 +153,14 @@ HTML;
 
 		if ($view_history_stats['last_view']) {
 			$last_view = $view_history_stats['last_view'];
-			$last_activity_date = date('d/m/y h:i:s A', $last_view);
+			$last_activity_date = date('d/m/y g:i:s A', $last_view);
 		}
 
 		$activity_class = '';
 		if (!$last_activity_date) {
 			// Use last login date if no views are available
 			if ($item->last_login) {
-				$last_activity_date = date('d/m/y h:i:s A', $item->last_login);
+				$last_activity_date = date('d/m/y g:i:s A', $item->last_login);
 			} else {
 				$last_activity_date = elgg_echo('members-extender:stats:never');
 				$activity_class = 'empty-value';
