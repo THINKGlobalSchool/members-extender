@@ -36,7 +36,7 @@ if (is_array($items) && count($items) > 0) {
 	$user_h = elgg_echo('members-extender:stats:user');
 	$status_h = elgg_echo('members-extender:stats:status');
 	$group_h = elgg_echo('members-extender:stats:groupaccess');
-	$login_h = elgg_echo('members-extender:stats:lastlogin');
+	$activity_h = elgg_echo('members-extender:stats:lastactivity');
 	$post_h = elgg_echo('members-extender:stats:postactivity');
 	$view_h = elgg_echo('members-extender:stats:viewactivity');
 
@@ -54,7 +54,7 @@ if (is_array($items) && count($items) > 0) {
 			<thead>
 				<tr>
 					<th colspan='2'>$user_h</th>
-					<th>$login_h</th>
+					<th>$activity_h</th>
 					$group_header
 					<th>$status_h</th>
 					<th>$post_h</th>
@@ -73,15 +73,6 @@ HTML;
 		$time = time() - 300; // Current time minus 5 minutes
 		$status = $item->last_action >= $time ? 'online' : 'offline';
 		$online_status = elgg_echo("members-extender:stats:{$status}");
-
-		// Last login
-		if ($item->last_login) {
-			$last_login = date("d/m/y", $item->last_login);
-			$login_class = '';
-		} else {
-			$last_login = elgg_echo('members-extender:stats:never');
-			$login_class = 'empty-value';
-		}
 
 		// Time frames for view/post stats
 		$today = time();
@@ -140,6 +131,27 @@ HTML;
 			'view_time_upper' => $today_ms
 		));
 
+
+		$last_activity_date = NULL;
+		// Grab the last view date for last activity
+		foreach ($view_history_stats as $date => $count) {
+			if ($count > 0) {
+				$last_activity_date = $date;
+			}
+		}
+
+		$activity_class = '';
+		// $last_login = date("d/m/y", $item->last_login);
+		if (!$last_activity_date) {
+			// Use last login date if no views are available
+			if ($item->last_login) {
+				$last_activity_date = date('Y-m-d', $item->last_login);
+			} else {
+				$last_activity_date = elgg_echo('members-extender:stats:never');
+				$activity_class = 'empty-value';
+			}
+		}
+
 		if (count($view_history_stats)) {
 			$views = array();
 			foreach ($view_history_stats as $date => $count) {
@@ -162,7 +174,7 @@ HTML;
 			<tr>
 				<td class='member-engagement-avatar'>$icon</td>
 				<td class='member-engagement-link'>$user_link</td>
-				<td class='member-engagement-login $login_class'>$last_login</td>
+				<td class='member-engagement-activity $activity_class'>$last_activity_date</td>
 				$group_content
 				<td class='member-engagement-status status-$status'>$online_status</td>
 				<td class='member-engagement-post $post_class'>$post_history</td>
