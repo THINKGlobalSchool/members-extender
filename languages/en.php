@@ -24,6 +24,7 @@ $english = array(
 	'members-extender:label:awsaccesssecret' => 'AWS Access Secret',
 	'members-extender:label:awsaccessregion' => 'AWS Region (ie: us-east-1)',
 	'members-extender:label:awsaccessdbtable' => 'AWS DynamoDB table',
+	'members-extender:label:activity_tz' => 'Activity Timezone',
 
 	// Stats
 	'members-extender:stats:user' => 'User',

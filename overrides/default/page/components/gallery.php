@@ -152,7 +152,7 @@ HTML;
 		$last_view = $last_activity_date = FALSE;
 
 		if ($view_history_stats['last_view']) {
-			$last_view = $view_history_stats['last_view'];
+			$last_view = $view_history_stats['last_view'] + members_extender_get_submission_timezone_offset();
 			$last_activity_date = date('d/m/y g:i:s A', $last_view);
 		}
 
@@ -160,7 +160,7 @@ HTML;
 		if (!$last_activity_date) {
 			// Use last login date if no views are available
 			if ($item->last_login) {
-				$last_activity_date = date('d/m/y g:i:s A', $item->last_login);
+				$last_activity_date = date('d/m/y g:i:s A', $item->last_login + members_extender_get_submission_timezone_offset());
 			} else {
 				$last_activity_date = elgg_echo('members-extender:stats:never');
 				$activity_class = 'empty-value';

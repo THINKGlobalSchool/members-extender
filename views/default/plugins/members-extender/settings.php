@@ -54,6 +54,29 @@ $global_engagement_role_select = elgg_view('input/roledropdown', array(
 	'show_hidden' => TRUE,
 ));
 
+// Time zone offset select
+$utc = new DateTimeZone('UTC');
+$dt = new DateTime('now', $utc);
+
+$tz_option_values = array(0 => 'Disabled');
+
+foreach(DateTimeZone::listIdentifiers() as $tz) {
+	$current_tz = new DateTimeZone($tz);
+	$offset =  $current_tz->getOffset($dt);
+	$transition =  $current_tz->getTransitions($dt->getTimestamp(), $dt->getTimestamp());
+	$abbr = $transition[0]['abbr'];
+	$formatted_offset = todo_format_tz_offet($offset);
+	$option = "{$tz} [{$abbr} $formatted_offset]";
+	$tz_option_values[$tz] = $option;
+}
+
+$activity_tz_label = elgg_echo('members-extender:label:activity_tz');
+$activity_tz_input = elgg_view('input/dropdown', array(
+		'name' => 'params[activity_tz]',
+		'options_values' => $tz_option_values,
+		'value' => $vars['entity']->activity_tz,
+));
+
 $content = <<<HTML
 	<div>
 		<label>$hidden_role_label</label><br />
@@ -90,6 +113,10 @@ $content = <<<HTML
 	<div>
 		<label>$global_engagement_role_label</label><br />
 		$global_engagement_role_select
+	</div>
+	<div>
+		<label>$activity_tz_label</label><br />
+		$activity_tz_input
 	</div>
 HTML;
 

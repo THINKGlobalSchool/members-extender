@@ -601,3 +601,31 @@ function members_extender_engagement_gatekeeper() {
 	$engagement_role = elgg_get_plugin_setting('engagement_role', 'members-extender');
 	return roles_is_member($engagement_role, elgg_get_logged_in_user_guid()) || elgg_is_admin_logged_in();
 }
+
+/**
+ * Helper function to get the timezone offset for activity views
+ *
+ * @return int
+ */
+function members_extender_get_submission_timezone_offset() {
+	// Get timezone
+	$utc = new DateTimeZone('UTC');
+
+	// Get current date/time
+	$current_dt = new DateTime('now', $utc);
+
+	$activity_tz = elgg_get_plugin_setting('activity_tz', 'members-extender');
+
+	// Might be unset/disabled, so return 0
+	if (!$activity_tz) {
+		return 0;
+	}
+
+	// Get configured time zone object
+	$time_zone = new DateTimeZone($activity_tz);
+
+	// Calulate offset
+	$offset =  $time_zone->getOffset($current_dt);
+
+	return $offset;
+}
