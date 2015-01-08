@@ -380,7 +380,7 @@ function members_custom_menu_setup($hook, $type, $return, $params) {
 		}
 	}
 
-	if (elgg_is_admin_logged_in()) {
+	if (members_extender_engagement_gatekeeper()) {
 		if (get_input('engagement')) {
 			$en_value = 0;
 			$en_text = elgg_echo('members-extender:label:viewgallery');

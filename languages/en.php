@@ -15,6 +15,7 @@ $english = array(
 	// Labels
 	'members-extender:label:all' => 'All',
 	'members-extender:label:hiddenrole' => 'Hidden Role',
+	'members-extender:label:engagementrole' => 'Global Engagement Role',
 	'members-extender:label:displayonmembers' => 'Display as tab on Members page',
 	'members-extender:label:subcategories' => 'Sub categories (roles) for advanced filtering on members page',
 	'members-extender:label:viewengagement' => 'View Engagement',

@@ -580,3 +580,11 @@ function members_extender_view_items_callback($item) {
 	}
 	return $return;
 }
+
+/**
+ * Gatekeeper for global member engagement
+ */
+function members_extender_engagement_gatekeeper() {
+	$engagement_role = elgg_get_plugin_setting('engagement_role', 'members-extender');
+	return roles_is_member($engagement_role, elgg_get_logged_in_user_guid()) || elgg_is_admin_logged_in();
+}
