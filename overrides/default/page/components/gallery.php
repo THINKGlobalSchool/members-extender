@@ -131,30 +131,10 @@ HTML;
 			'view_time_upper' => $today_ms
 		));
 
-
-		$last_activity_date = NULL;
-		// Grab the last view date for last activity
-		foreach ($view_history_stats as $date => $count) {
-			if ($count > 0) {
-				$last_activity_date = $date;
-			}
-		}
-
-		$activity_class = '';
-		// $last_login = date("d/m/y", $item->last_login);
-		if (!$last_activity_date) {
-			// Use last login date if no views are available
-			if ($item->last_login) {
-				$last_activity_date = date('Y-m-d', $item->last_login);
-			} else {
-				$last_activity_date = elgg_echo('members-extender:stats:never');
-				$activity_class = 'empty-value';
-			}
-		}
-
-		if (count($view_history_stats)) {
+		if (count($view_history_stats['dates'])) {
 			$views = array();
-			foreach ($view_history_stats as $date => $count) {
+
+			foreach ($view_history_stats['dates'] as $date => $count) {
 				$views[date('d',strtotime($date))] = $count;
 			}
 
@@ -167,6 +147,24 @@ HTML;
 
 		} else {
 			$view_class = 'empty-value';
+		}
+
+		$last_view = $last_activity_date = FALSE;
+
+		if ($view_history_stats['last_view']) {
+			$last_view = $view_history_stats['last_view'];
+			$last_activity_date = date('d/m/y h:i:s A', $last_view);
+		}
+
+		$activity_class = '';
+		if (!$last_activity_date) {
+			// Use last login date if no views are available
+			if ($item->last_login) {
+				$last_activity_date = date('d/m/y h:i:s A', $item->last_login);
+			} else {
+				$last_activity_date = elgg_echo('members-extender:stats:never');
+				$activity_class = 'empty-value';
+			}
 		}
 
 		// Stats table row

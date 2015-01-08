@@ -554,8 +554,16 @@ function members_extender_get_user_views_by_date(array $options = array()) {
 	// Build date => view count array
 	$views_by_date = array();
 
+	$last_view = 0;
+
 	foreach ($views as $view) {
-		$views_by_date[date('Y-m-d', round($view['Time']/1000))] += 1;
+		$time = round($view['Time']/1000);
+
+		if ($time > $last_view) {
+			$last_view = $time;
+		}
+
+		$views_by_date[date('Y-m-d', $time)] += 1;
 	}
 
 	$date_array = array();
@@ -565,7 +573,12 @@ function members_extender_get_user_views_by_date(array $options = array()) {
 		$date_array[$dom] = $post_count_by_dom ? $post_count_by_dom : 0;
 	}
 
-	return $date_array;
+	$return = array(
+		'last_view' => $last_view,
+		'dates' => $date_array
+	);
+
+	return $return;
 }
 
 /**
