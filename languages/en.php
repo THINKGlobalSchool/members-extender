@@ -25,11 +25,12 @@ $english = array(
 	'members-extender:label:awsaccessregion' => 'AWS Region (ie: us-east-1)',
 	'members-extender:label:awsaccessdbtable' => 'AWS DynamoDB table',
 	'members-extender:label:activity_tz' => 'Activity Timezone',
+	'members-extender:label:group_prefix' => 'Group %s',
 
 	// Stats
 	'members-extender:stats:user' => 'User',
 	'members-extender:stats:status' => 'Status',
-	'members-extender:stats:groupaccess' => 'Last Group Access',
+	'members-extender:stats:groupaccess' => 'Last Group Activity',
 	'members-extender:stats:lastactivity' => 'Last Activity',
 	'members-extender:stats:postactivity' => 'Post Activity',
 	'members-extender:stats:viewactivity' => 'View Activity',

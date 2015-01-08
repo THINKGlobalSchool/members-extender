@@ -47,6 +47,9 @@ if (is_array($items) && count($items) > 0) {
 	$page_owner = elgg_get_page_owner_entity();
 	if (elgg_instanceof($page_owner, 'group')) {
 		$group_header = "<th>$group_h</th>";
+
+		$post_h = elgg_echo('members-extender:label:group_prefix', array($post_h));
+		$view_h = elgg_echo('members-extender:label:group_prefix', array($view_h));
 	}
 
 	$html .= <<<HTML
