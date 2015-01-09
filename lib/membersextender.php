@@ -147,11 +147,13 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	// Start date sql if supplied
 	if ($start) {
 		$start_sql = "AND e.time_created > {$start}";
+		$a_start_sql = "AND n_table.time_created > {$start}";
 	}
 
 	// End date sql if supplied
 	if ($end) {
 		$end_sql = "AND e.time_created < {$end}";
+		$a_end_sql = "AND n_table.time_created < {$end}";
 	} else {
 		$end = time();
 	}
@@ -173,7 +175,7 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	}
 
 	// Direct SQL
-	$query = "SELECT count(e.guid) as post_count,
+	$object_query = "SELECT count(e.guid) as post_count,
 	          FROM_UNIXTIME(e.time_created, '%Y-%m-%d') as post_day
 	          FROM {$dbprefix}entities e
 			  $container_join
@@ -185,9 +187,22 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	          $container_sql
 	          GROUP BY post_day";
 
-	// Get data
-	$result = get_data($query, 'members_extender_activity_row_to_array');
 
+	$annotation_query = "SELECT count(DISTINCT n_table.id) as post_count,
+						 FROM_UNIXTIME(n_table.time_created, '%Y-%m-%d') as post_day
+						 FROM {$dbprefix}annotations n_table
+						 JOIN {$dbprefix}entities e ON n_table.entity_guid = e.guid
+						 $container_join
+						 WHERE n_table.owner_guid = {$user->guid} 
+						 $a_start_sql 
+	         			 $a_end_sql
+	         			 $exclude_subtypes_sql
+	         			 $container_sql
+	         			 GROUP BY post_day";
+
+	// Get data
+	$object_result = get_data($object_query, 'members_extender_activity_row_to_array');
+	$annotation_result = get_data($annotation_query, 'members_extender_activity_row_to_array');
 
 	// Build results array with dates/posts
 	$num_days = abs($start - $end)/60/60/24; // Determine number of days between timestat
@@ -196,8 +211,10 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 	$date_array = array();
 	for ($i = 1; $i <= $num_days; $i++) {
 		$dom = date('Y-m-d', strtotime("+{$i} day", $start)); // Day of month
-		$post_count_by_dom = search_array_value_key($result, $dom);
-		$date_array[$dom] = $post_count_by_dom ? $post_count_by_dom : 0;
+		$object_count_by_dom = search_array_value_key($object_result, $dom);
+		$annotation_count_by_dom = search_array_value_key($annotation_result, $dom);
+		$total = $object_count_by_dom + $annotation_count_by_dom;
+		$date_array[$dom] = $total ? $total : 0;
 	}
 
 	return $date_array;

@@ -26,5 +26,11 @@
 		<version>1.8</version>
 		<comparison>ge</comparison>
 	</requires>
+	<requires>
+		<type>plugin</type>
+		<name>google-api-php-client</name>
+		<version>1.8</version>
+		<comparison>ge</comparison>
+	</requires>
 	<activate_on_install>true</activate_on_install>
 </plugin_manifest>
