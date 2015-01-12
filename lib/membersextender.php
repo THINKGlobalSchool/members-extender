@@ -192,12 +192,14 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
 						 FROM_UNIXTIME(n_table.time_created, '%Y-%m-%d') as post_day
 						 FROM {$dbprefix}annotations n_table
 						 JOIN {$dbprefix}entities e ON n_table.entity_guid = e.guid
+						 JOIN {$dbprefix}metastrings msn on n_table.name_id = msn.id
 						 $container_join
 						 WHERE n_table.owner_guid = {$user->guid} 
 						 $a_start_sql 
 	         			 $a_end_sql
 	         			 $exclude_subtypes_sql
 	         			 $container_sql
+	         			 AND (msn.string IN ('generic_comment', 'likes'))
 	         			 GROUP BY post_day";
 
 	// Get data
