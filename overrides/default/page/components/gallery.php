@@ -76,6 +76,8 @@ HTML;
 	// Load google drive activity system cache
 	$drive_activity_cache = unserialize(elgg_load_system_cache('google_user_drive_activity_cache'));
 
+	$canvas_height = "75px";
+
 	foreach ($items as $item) {
 		$icon = elgg_view_entity_icon($item, 'tiny');
 		$user_link = "<a href=\"" . $item->getUrl() . "\" $rel>" . $item->name . "</a>";
@@ -127,7 +129,7 @@ HTML;
 			$labels = json_encode(array_keys($posts));
 			$values = json_encode(array_values($posts));
 
-			$post_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+			$post_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
 
 			$post_class = '';
 		} else {
@@ -152,7 +154,7 @@ HTML;
 			$labels = json_encode(array_keys($views));
 			$values = json_encode(array_values($views));
 
-			$view_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+			$view_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
 
 			$view_class = '';
 
@@ -196,7 +198,7 @@ HTML;
 				$labels = json_encode(array_keys($drive_activity));
 				$values = json_encode(array_values($drive_activity));
 
-				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='drive-chart engagement-chart' id='drive-chart-{$item->guid}' width='10px' height='50px'></canvas></td>"; 
+				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='drive-chart engagement-chart' id='drive-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas></td>"; 
 
 				$drive_class = '';
 
