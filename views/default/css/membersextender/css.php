@@ -5,7 +5,7 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2012
+ * @copyright THINK Global School 2010 - 2015
  * @link http://www.thinkglobalschool.com/
  * 
  */
@@ -136,6 +136,12 @@
 	text-align: center;
 }
 
+.member-engagement-table.group-engagement td.member-engagement-post,
+.member-engagement-table.group-engagement td.member-engagement-view {
+	width: 24%;
+}
+
+
 .member-engagement-table tbody tr > td {
 	vertical-align: middle;
 }
@@ -149,5 +155,25 @@
 
 .members-show-subcategories {
 	display: block;
+}
+
+/** Custom chart tooltip **/
+#chartjs-tooltip {
+    opacity: 1;
+    position: absolute;
+    background: rgba(0, 0, 0, .7);
+    color: white;
+    padding: 3px;
+    border-radius: 3px;
+    -webkit-transition: all .1s ease;
+    transition: all .1s ease;
+    pointer-events: none;
+    -webkit-transform: translate(-50%, 0);
+    transform: translate(-50%, 0);
+}
+.chartjs-tooltip-key{
+	display:inline-block;
+	width:10px;
+	height:10px;
 }
 

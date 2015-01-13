@@ -41,7 +41,7 @@ if (is_array($items) && count($items) > 0) {
 	$view_h = elgg_echo('members-extender:stats:viewactivity');
 
 	// Placeholder
-	$view_history = $post_history = $group_access = $drive_history = 'unavailable';
+	$view_history = $post_history = $group_access = 'unavailable';
 
 	// Check for and include group only content as necessary
 	$page_owner = elgg_get_page_owner_entity();
@@ -50,12 +50,14 @@ if (is_array($items) && count($items) > 0) {
 
 		$post_h = elgg_echo('members-extender:label:group_prefix', array($post_h));
 		$view_h = elgg_echo('members-extender:label:group_prefix', array($view_h));
+		$group_class = 'group-engagement';
 	} else {
 		$drive_h = "<th>" . elgg_echo('members-extender:stats:driveactivity') . "</th>";
 	}
 
 	$html .= <<<HTML
-		<table class='elgg-table member-engagement-table'>
+	<div id="chartjs-tooltip" style='opacity: 0;'></div>
+		<table class='elgg-table member-engagement-table $group_class'>
 			<thead>
 				<tr>
 					<th colspan='2'>$user_h</th>
@@ -122,7 +124,7 @@ HTML;
 			$labels = json_encode(array_keys($posts));
 			$values = json_encode(array_values($posts));
 
-			$post_history = "<canvas data-labels={$labels} data-values={$values} class='post-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+			$post_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
 
 			$post_class = '';
 		} else {
@@ -147,7 +149,7 @@ HTML;
 			$labels = json_encode(array_keys($views));
 			$values = json_encode(array_values($views));
 
-			$view_history = "<canvas data-labels={$labels} data-values={$values} class='post-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
+			$view_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='50px'></canvas>";
 
 			$view_class = '';
 
@@ -176,7 +178,6 @@ HTML;
 		// Drive history (if not in group view)
 		if ($drive_h) {
 			$drive_history_stats = members_extender_get_user_drive_activity_stats($item, $last_week, $today);
-
 			if (count($drive_history_stats)) {
 				$drive_activity = array();
 
@@ -187,7 +188,7 @@ HTML;
 				$labels = json_encode(array_keys($drive_activity));
 				$values = json_encode(array_values($drive_activity));
 
-				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='post-chart' id='drive-chart-{$item->guid}' width='10px' height='50px'></canvas></td>"; 
+				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='drive-chart engagement-chart' id='drive-chart-{$item->guid}' width='10px' height='50px'></canvas></td>"; 
 
 				$drive_class = '';
 

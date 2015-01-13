@@ -41,25 +41,53 @@ elgg.membersextender.init = function() {
 
 // Init chart.js
 elgg.membersextender.initCharts = function() {
-	$('.post-chart').each(function(idx) {
+	$('.engagement-chart').each(function(idx) {
 		var context = this.getContext("2d");
 		
 		this.style.width='100%';
 		this.width  = this.offsetWidth;
 
+		if ($(this).hasClass('spot-chart')) {
+			var color = "rgba(130,21,26,0.8)";
+			var options = elgg.membersextender.activity_options;
+
+			var max = 10;
+			var step = 1;
+			var start = 0;
+
+			options.scaleOverride = true;
+			options.scaleSteps = Math.ceil(max/step);
+			options.scaleStepWidth = step;
+			options.scaleStartValue = start;
+
+
+		} else if ($(this).hasClass('drive-chart')) {
+			var color = "rgba(9,159,87,1)";
+			var options = elgg.membersextender.activity_options;
+
+			var max = 10;
+			var step = 2;
+			var start = 0;
+
+			options.scaleOverride = true;
+			options.scaleSteps = Math.ceil(max/step);
+			options.scaleStepWidth = step;
+			options.scaleStartValue = start;
+		}
+
 		var data = {
 		    labels: $(this).data('labels'),
 		    datasets: [
 		        {
-		            fillColor: "rgba(130,21,26,0.8)",
-		            strokeColor: "rgba(130,21,26,0.8)",
-		            highlightFill: "rgba(130,21,26,1)",
+		            fillColor: color,
+		            strokeColor: color,
+		            highlightFill: color,
 		            data: $(this).data('values')
 		        }
 		    ]
 		};
 
-		var chart = new Chart(context).Bar(data, elgg.membersextender.activity_options);
+		var chart = new Chart(context).Bar(data, options);
 	});
 }
 
@@ -72,8 +100,31 @@ elgg.membersextender.activity_options = {
 	barDatasetSpacing: 1,
 	tooltipFontSize: 12,
 	// New option because apparently hiding the scale doesn't hide the lines..
-	hideTheDamnYScale: true
-};
+	hideTheDamnYScale: true,
+	customTooltips: function(tooltip) {
+		var tooltipEl = $('#chartjs-tooltip');
+		tooltipEl.appendTo('body');
+
+		if (!tooltip) {
+            tooltipEl.css({
+                opacity: 0
+            });
+            return;
+        }
+        
+        tooltipEl.html(tooltip.text);
+
+        // Display, position, and set styles for font
+        tooltipEl.css({
+            opacity: 1,
+            left: $(tooltip.chart.canvas).offset().left + tooltip.x + 'px',
+            top: $(tooltip.chart.canvas).offset().top - 10 + 'px',
+            fontFamily: tooltip.fontFamily,
+            fontSize: tooltip.fontSize,
+            fontStyle: tooltip.fontStyle,
+        });
+	}
+ };
 
 // Init avatar hover
 elgg.membersextender.initAvatarHover = function() {
