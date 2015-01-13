@@ -129,8 +129,9 @@
 }
 
 .member-engagement-table td.member-engagement-post,
-.member-engagement-table td.member-engagement-view {
-	width: 24%;
+.member-engagement-table td.member-engagement-view,
+.member-engagement-table td.member-engagement-drive {
+	width: 20%;
 	padding-top: 5px;
 	text-align: center;
 }

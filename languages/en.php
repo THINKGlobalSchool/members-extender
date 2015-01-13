@@ -34,9 +34,18 @@ $english = array(
 	'members-extender:stats:lastactivity' => 'Last Activity',
 	'members-extender:stats:postactivity' => 'Write Activity',
 	'members-extender:stats:viewactivity' => 'View Activity',
+	'members-extender:stats:driveactivity' => 'Drive Activity',
 	'members-extender:stats:online' => 'Online',
 	'members-extender:stats:offline' => 'Offline',
-	'members-extender:stats:never' => 'Never'
+	'members-extender:stats:never' => 'Never',
+
+	// Admin
+	'members-extender:admin:api_client_id' => 'Google API Client ID',
+	'members-extender:admin:service_address' => 'Google API Service Account Email Address',
+	'members-extender:admin:authentication' => 'Client Authentication',
+	'members-extender:admin:keylocation' => 'Location of Service Account Private Key',
+	'members-extender:admin:keypassword' => 'Service key password',
+	'members-extender:admin:impersonate' => 'Impersonate (Admin) User',
 );
 
 add_translation('en',$english);

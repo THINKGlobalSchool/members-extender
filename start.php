@@ -5,7 +5,7 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2014
+ * @copyright THINK Global School 2010 - 2015
  * @link http://www.thinkglobalschool.com/
  * 
  * OVERRIDES:
@@ -25,6 +25,7 @@ elgg_load_library('awssdk');
 function members_extender_init() {
 
 	define('MEMBERS_SUB_CATEGORY_RELATIONSHIP', 'is_member_subcategory_for');
+	define('MEMBERS_GAPPS_DOMAIN', 'thinkglobalschool.com');
 
 	// Register plugin library
 	elgg_register_library('elgg:membersextender', elgg_get_plugins_path() . 'members-extender/lib/membersextender.php');

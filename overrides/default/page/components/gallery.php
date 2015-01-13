@@ -41,7 +41,7 @@ if (is_array($items) && count($items) > 0) {
 	$view_h = elgg_echo('members-extender:stats:viewactivity');
 
 	// Placeholder
-	$view_history = $post_history = $group_access = 'unavailable';
+	$view_history = $post_history = $group_access = $drive_history = 'unavailable';
 
 	// Check for and include group only content as necessary
 	$page_owner = elgg_get_page_owner_entity();
@@ -50,6 +50,8 @@ if (is_array($items) && count($items) > 0) {
 
 		$post_h = elgg_echo('members-extender:label:group_prefix', array($post_h));
 		$view_h = elgg_echo('members-extender:label:group_prefix', array($view_h));
+	} else {
+		$drive_h = "<th>" . elgg_echo('members-extender:stats:driveactivity') . "</th>";
 	}
 
 	$html .= <<<HTML
@@ -62,6 +64,7 @@ if (is_array($items) && count($items) > 0) {
 					<th>$status_h</th>
 					<th>$post_h</th>
 					<th>$view_h</th>
+					$drive_h
 				</tr>
 			</thead>
 			<tbody>
@@ -170,6 +173,29 @@ HTML;
 			}
 		}
 
+		// Drive history (if not in group view)
+		if ($drive_h) {
+			$drive_history_stats = members_extender_get_user_drive_activity_stats($item, $last_week, $today);
+
+			if (count($drive_history_stats)) {
+				$drive_activity = array();
+
+				foreach ($drive_history_stats as $date => $count) {
+					$drive_activity[date('d',strtotime($date))] = $count;
+				}
+
+				$labels = json_encode(array_keys($drive_activity));
+				$values = json_encode(array_values($drive_activity));
+
+				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='post-chart' id='drive-chart-{$item->guid}' width='10px' height='50px'></canvas></td>"; 
+
+				$drive_class = '';
+
+			} else {
+				$drive_class = 'empty-value';
+			}
+		}
+
 		// Stats table row
 		$html .= <<<HTML
 			<tr>
@@ -180,6 +206,7 @@ HTML;
 				<td class='member-engagement-status status-$status'>$online_status</td>
 				<td class='member-engagement-post $post_class'>$post_history</td>
 				<td class='member-engagement-view $view_class'>$view_history</td>
+				$drive_history
 			</tr>
 HTML;
 

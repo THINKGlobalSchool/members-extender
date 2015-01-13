@@ -110,9 +110,10 @@ function members_extender_get_exclude_parent_sql() {
 /**
  * Get member post activity (objects created) between given time period
  *
- * @param ElggUser $user
- * @param int      $start Default: none
- * @param int      $end   Default: none
+ * @param ElggUser   $user
+ * @param ElggObject $container Object container
+ * @param int        $start     Default: none
+ * @param int        $end       Default: none
  * @return
  */
 function members_extender_get_user_post_activity($user, $container = FALSE, $start = 0, $end = 0) {
@@ -227,6 +228,91 @@ function members_extender_get_user_post_activity($user, $container = FALSE, $sta
  */
 function members_extender_activity_row_to_array($row) {
 	return array($row->post_day => $row->post_count);
+}
+
+/**
+ * Get a user's Google Drive activity
+ *
+ * @param ElggUser $user
+ * @param int      $start Default: none
+ * @param int      $end   Default: none
+ * @return
+ */
+function members_extender_get_user_drive_activity($user, $start, $end, $page_token = FALSE) {
+	if (!$user->email || $user->email === "" || !(substr($user->email, -strlen(MEMBERS_GAPPS_DOMAIN)) === MEMBERS_GAPPS_DOMAIN)) {
+		return FALSE;
+	}
+
+	$client = members_extender_get_google_service_client();
+	
+	elgg_load_library('gapc:Reports');
+
+	$service = new Google_Service_Reports($client);
+
+	$params = array();
+
+	if ($page_token) {
+		$params['pageToken'] = $page_token;
+	}
+
+	// Attempt to create DateTime objects with given date strings
+	$start_date = $start ? new DateTime(date("c", $start)) : FALSE;
+	$end_date =  $end ? new DateTime(date("c", $end)) : FALSE;
+
+	// If we've got dates, format then ISO-8602 (2014-12-07T00:00:00Z)
+	if ($start_date) {
+		$params['startTime'] = $start_date->format('c');
+	}
+
+	if ($end_date) {
+		$params['endTime'] = $end_date->format('c');
+	}
+
+	// Wrap this in a try/catch to handle invalid requests
+	try {
+		$activity = $service->activities->listActivities($user->email, 'drive', $params);
+		$items = $activity->getItems();
+		
+		if ($activity->getNextPageToken()) {
+			$new_activity_items = members_extender_get_user_drive_activity($user, $start, $end, $activity->getNextPageToken());
+			if ($new_activity_items) {
+				$items = array_merge($items, $new_activity_items);
+			}
+		}
+
+		return $items;
+	} catch (Google_Service_Exception $e) {
+		$errors = $e->getErrors();
+		// Check for a bad request error, this is likely non-existant domain email
+		if (isset($errors['reason']) && $errors['reason'] == 'badRequest') {
+			return FALSE;			
+		}
+	}	
+}
+
+/**
+ * Get user drive activity stats
+ */
+function members_extender_get_user_drive_activity_stats($user, $start, $end) {
+	$activity_objects = members_extender_get_user_drive_activity($user, $start, $end);
+
+	$num_days = abs($start - $end)/60/60/24; // Determine number of days start and end time
+
+
+	$drive_activity_by_date = array();
+	foreach ($activity_objects as $activity) {
+			$date = date('Y-m-d', strtotime($activity->getId()->getTime()));
+			$drive_activity_by_date[$date] += 1;
+	}
+
+	$date_array = array();
+	for ($i = 1; $i <= $num_days; $i++) {
+		$dom = date('Y-m-d', strtotime("+{$i} day", $start)); // Day of month
+		$drive_activity_by_dom = search_array_value_key($drive_activity_by_date, $dom);
+		$date_array[$dom] = $drive_activity_by_dom ? $drive_activity_by_dom : 0;
+	}
+
+	return $date_array;
 }
 
 /**
@@ -647,4 +733,52 @@ function members_extender_get_submission_timezone_offset() {
 	$offset =  $time_zone->getOffset($current_dt);
 
 	return $offset;
+}
+
+/**
+ * Get google client with configured service account credentials
+ */
+function members_extender_get_google_service_client($impersonate = FALSE) {
+	elgg_load_library('gapc:Client');
+	$plugin = elgg_get_plugin_from_id('members-extender');
+
+	$client = new Google_Client();
+	$client->setApplicationName("TGS Drive Activity");
+
+	if ($plugin->service_token) {
+		$client->setAccessToken($plugin->service_token);
+	}
+
+	// Get auth/key info from plugin settings
+	$key_location = elgg_get_plugin_setting('google_api_client_service_key', 'members-extender');
+	$key_password = elgg_get_plugin_setting('google_api_client_service_key_password', 'members-extender');
+	$service_account = elgg_get_plugin_setting('google_api_client_address', 'members-extender');
+	
+	// If no user is supplied to impersonate, use the admin user
+	if (!$impersonate) {
+		$impersonate = elgg_get_plugin_setting('google_api_client_service_key_impersonate', 'members-extender');
+	}
+
+	$key = file_get_contents($key_location);
+
+	// Get credentials
+	$credentials = new Google_Auth_AssertionCredentials(
+		$service_account,
+		array(
+			"https://www.googleapis.com/auth/admin.reports.audit.readonly",
+			"https://www.googleapis.com/auth/admin.reports.usage.readonly"
+		),
+		$key,
+		$key_password,
+		'http://oauth.net/grant_type/jwt/1.0/bearer',
+		$impersonate
+	);
+	$client->setAssertionCredentials($credentials);
+
+	if($client->getAuth()->isAccessTokenExpired()) {
+		$client->getAuth()->refreshTokenWithAssertion($credentials);
+	}
+	$plugin->service_token = $client->getAccessToken();
+
+	return $client;
 }
