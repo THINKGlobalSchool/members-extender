@@ -111,6 +111,9 @@ function members_extender_init() {
 	// Set up members menu
 	elgg_register_plugin_hook_handler('register', 'menu:members_custom', 'members_custom_menu_setup');
 
+	// Register cron for updating member Google Drive activity
+	elgg_register_plugin_hook_handler('cron', 'fifteenmin', 'members_extender_drive_activity_cron');
+
 	// Whitelist ajax views
 	elgg_register_ajax_view('members-extender/list');
 }
@@ -430,4 +433,33 @@ function members_extender_roles_save_members_tab($event, $object_type, $object) 
 		}
 	}
 	return TRUE;
+}
+
+/**
+ * Query the Google Drive/Reports API to populate a local cache of one week's worth of 
+ * drive activity
+ */
+function members_extender_drive_activity_cron($hook, $type, $value, $params) {
+	set_time_limit(0); // No timeout, just in case
+
+	$domain = MEMBERS_GAPPS_DOMAIN;
+	$dbprefix = elgg_get_config('dbprefix');
+
+	$users = elgg_get_entities(array(
+		'type' => 'user',
+		'limit' => 0,
+		'joins' => array("JOIN {$dbprefix}users_entity ue on e.guid = ue.guid"),
+		'wheres' => array("ue.email like '%{$domain}'")
+	));
+
+	$google_user_drive_activity = array();
+
+	$today = time();
+	$last_week = strtotime("-7 days", $today);
+
+	foreach ($users as $user) {
+		$google_user_drive_activity[$user->guid] = members_extender_get_user_drive_activity_stats($user, $last_week, $today);
+	}
+
+	elgg_save_system_cache('google_user_drive_activity_cache', serialize($google_user_drive_activity));
 }

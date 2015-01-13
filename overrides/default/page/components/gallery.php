@@ -73,6 +73,9 @@ if (is_array($items) && count($items) > 0) {
 HTML;
 
 
+	// Load google drive activity system cache
+	$drive_activity_cache = unserialize(elgg_load_system_cache('google_user_drive_activity_cache'));
+
 	foreach ($items as $item) {
 		$icon = elgg_view_entity_icon($item, 'tiny');
 		$user_link = "<a href=\"" . $item->getUrl() . "\" $rel>" . $item->name . "</a>";
@@ -177,7 +180,12 @@ HTML;
 
 		// Drive history (if not in group view)
 		if ($drive_h) {
-			$drive_history_stats = members_extender_get_user_drive_activity_stats($item, $last_week, $today);
+			if (array_key_exists($item->guid, $drive_activity_cache)) {
+				$drive_history_stats = $drive_activity_cache[$item->guid];
+			} else {
+				$drive_history_stats = members_extender_get_user_drive_activity_stats($item, $last_week, $today);
+			}
+
 			if (count($drive_history_stats)) {
 				$drive_activity = array();
 

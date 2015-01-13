@@ -51,8 +51,8 @@ elgg.membersextender.initCharts = function() {
 			var color = "rgba(130,21,26,0.8)";
 			var options = elgg.membersextender.activity_options;
 
-			var max = 10;
-			var step = 1;
+			var max = 50;
+			var step = 25;
 			var start = 0;
 
 			options.scaleOverride = true;
@@ -65,8 +65,8 @@ elgg.membersextender.initCharts = function() {
 			var color = "rgba(9,159,87,1)";
 			var options = elgg.membersextender.activity_options;
 
-			var max = 10;
-			var step = 2;
+			var max = 80;
+			var step = 1;
 			var start = 0;
 
 			options.scaleOverride = true;

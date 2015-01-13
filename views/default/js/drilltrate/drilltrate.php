@@ -5,7 +5,7 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2014
+ * @copyright THINK Global School 2010 - 2015
  * @link http://www.thinkglobalschool.com/
  * 
  */
@@ -332,7 +332,6 @@ elgg.provide('elgg.drilltrate');
 			// Bind menu links
 			self.find('.drilltrate-menu-container li > a').live('click', function(event) {
 				var $_this = $(this);
-				console.log('clack');
 				self.find('[data-param="' + $(this).data('param') + '"]').each(function(idx) {
 
 					// Deactivate children
