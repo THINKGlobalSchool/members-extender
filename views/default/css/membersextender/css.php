@@ -136,6 +136,12 @@
 	text-align: center;
 }
 
+.member-engagement-table canvas.post-chart,
+.member-engagement-table canvas.drive-chart,
+.member-engagement-table canvas.view-chart {
+	cursor: pointer;
+}
+
 .member-engagement-table.group-engagement td.member-engagement-post,
 .member-engagement-table.group-engagement td.member-engagement-view {
 	width: 24%;
@@ -146,7 +152,49 @@
 	vertical-align: middle;
 }
 
+.members-extender-engagement-drive-detail-container {
+	width: 650px;
+}
 
+.members-extender-engagement-drive-detail-container ul {
+
+}
+
+.members-extender-engagement-drive-detail-container ul li {
+
+}
+
+.members-extender-engagement-drive-detail-container ul li:nth-child(odd) {
+	background: #EEEEEE;
+}
+
+.members-extender-engagement-drive-detail-container ul li:nth-child(even) {
+
+}
+
+.members-extender-engagement-drive-detail-container ul li .elgg-body {
+	font-size: 0.9em;
+	font-weight: bold;
+	color: #333;
+	padding-top: 2px;
+}
+
+.members-extender-engagement-drive-detail-container ul li .elgg-image {
+
+}
+
+.members-extender-engagement-drive-detail-container ul li .elgg-image-block {
+	float: left;
+	width: 536px;
+}
+
+.members-extender-engagement-drive-detail-container ul li span.date {
+	display: inline-block;
+	float: right;
+	font-size: 0.75em;
+	width: 110px;
+	padding-top: 7px;
+}
 
 /** Admin area **/
 .members-sub-categories-container {

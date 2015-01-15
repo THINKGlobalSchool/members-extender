@@ -37,6 +37,8 @@ elgg.membersextender.init = function() {
 
 	// Init custom members navigation
 	$('.members-extender-main-nav').live('click', elgg.membersextender.mainNavClick);
+
+	elgg.membersextender.initLightboxen();
 }
 
 // Init chart.js
@@ -47,7 +49,7 @@ elgg.membersextender.initCharts = function() {
 		this.style.width='100%';
 		this.width  = this.offsetWidth;
 
-		if ($(this).hasClass('spot-chart')) {
+		if ($(this).hasClass('post-chart') || $(this).hasClass('view-chart')) {
 			var color = "rgba(130,21,26,0.8)";
 			var options = elgg.membersextender.activity_options;
 
@@ -126,6 +128,14 @@ elgg.membersextender.activity_options = {
 	}
  };
 
+elgg.membersextender.initLightboxen = function() {
+	$('.drive-chart').each(function(idx) {
+		$(this).fancybox({
+			'href': $(this).data('endpoint')
+		});
+	});
+}
+
 // Init avatar hover
 elgg.membersextender.initAvatarHover = function() {
 	// Show/Hide user gallery hover info
@@ -185,4 +195,5 @@ elgg.membersextender.positionAchievements = function(hook, type, params, options
 elgg.register_hook_handler('init', 'system', elgg.membersextender.init);
 elgg.register_hook_handler('generic_populated', 'modules', elgg.membersextender.init);
 elgg.register_hook_handler('content_loaded', 'drilltrate', elgg.membersextender.initAvatarHover);
+elgg.register_hook_handler('content_loaded', 'drilltrate', elgg.membersextender.initLightboxen);
 elgg.register_hook_handler('setPopupLocation', 'achievements', elgg.membersextender.positionAchievements);

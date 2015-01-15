@@ -5,7 +5,7 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2014
+ * @copyright THINK Global School 2010 - 2015
  * @link http://www.thinkglobalschool.com/
  * 
  */
@@ -234,11 +234,12 @@ function members_extender_activity_row_to_array($row) {
  * Get a user's Google Drive activity
  *
  * @param ElggUser $user
- * @param int      $start Default: none
- * @param int      $end   Default: none
+ * @param int      $start       Default: none
+ * @param int      $end         Default: none
+ * @param int      $max_results Maximum amount of results to return
  * @return
  */
-function members_extender_get_user_drive_activity($user, $start, $end, $page_token = FALSE) {
+function members_extender_get_user_drive_activity($user, $start, $end, $page_token = FALSE, $max_results = 1000) {
 	if (!$user->email || $user->email === "" || !(substr($user->email, -strlen(MEMBERS_GAPPS_DOMAIN)) === MEMBERS_GAPPS_DOMAIN)) {
 		return FALSE;
 	}
@@ -249,7 +250,9 @@ function members_extender_get_user_drive_activity($user, $start, $end, $page_tok
 
 	$service = new Google_Service_Reports($client);
 
-	$params = array();
+	$params = array(
+		'maxResults' => $max_results
+	);
 
 	if ($page_token) {
 		$params['pageToken'] = $page_token;
@@ -273,8 +276,9 @@ function members_extender_get_user_drive_activity($user, $start, $end, $page_tok
 		$activity = $service->activities->listActivities($user->email, 'drive', $params);
 		$items = $activity->getItems();
 		
-		if ($activity->getNextPageToken()) {
-			$new_activity_items = members_extender_get_user_drive_activity($user, $start, $end, $activity->getNextPageToken());
+		if ($activity->getNextPageToken() && count($items) < $max_results) {
+			$item_count = $max_results - count($items);
+			$new_activity_items = members_extender_get_user_drive_activity($user, $start, $end, $activity->getNextPageToken(), $item_count);
 			if ($new_activity_items) {
 				$items = array_merge($items, $new_activity_items);
 			}
@@ -704,7 +708,7 @@ function members_extender_view_items_callback($item) {
  */
 function members_extender_engagement_gatekeeper() {
 	$engagement_role = elgg_get_plugin_setting('engagement_role', 'members-extender');
-	return roles_is_member($engagement_role, elgg_get_logged_in_user_guid()) || elgg_is_admin_logged_in();
+	return (roles_is_member($engagement_role, elgg_get_logged_in_user_guid()) || elgg_is_admin_logged_in()) && elgg_is_logged_in();
 }
 
 /**
@@ -712,7 +716,7 @@ function members_extender_engagement_gatekeeper() {
  *
  * @return int
  */
-function members_extender_get_submission_timezone_offset() {
+function members_extender_get_timezone_offset() {
 	// Get timezone
 	$utc = new DateTimeZone('UTC');
 
@@ -781,4 +785,115 @@ function members_extender_get_google_service_client($impersonate = FALSE) {
 	$plugin->service_token = $client->getAccessToken();
 
 	return $client;
+}
+
+/**
+ * Generate url for given google drive type icon
+ */
+function members_extender_get_item_image_url($type) {
+	$known_types = array(
+		'document',
+		'presentation',
+		'spreadsheet',
+		'video',
+		'folder'
+	);
+
+	$base = elgg_normalize_url('mod/members-extender/graphics/');
+
+	if (in_array($type, $known_types)) {
+		return "{$base}google_{$type}.png";
+	} else {
+		return "{$base}google_drive.png";
+	}
+}
+
+/**
+ * Generate event info
+ */
+function members_extender_get_events_info($events) {
+	// Get date from events
+	$doc_event_date = $events->getId()->getTime();
+	$doc_event_date = strtotime($doc_event_date) + members_extender_get_timezone_offset();
+	$doc_event_date = date('d/m/y g:i:s A', $doc_event_date);
+
+	$multi_events = array(
+		'add_to_folder' => array(
+			'primary' => 'doc_title',
+			'secondary' => 'destination_folder_title'
+		),
+		'remove_from_folder' => array(
+			'primary' => 'doc_title',
+			'secondary' => 'source_folder_title'
+		),
+		'rename' =>  array(
+			'primary' => 'old_value', 
+			'secondary' => 'new_value'
+		),
+		'move' => array(
+			'primary' => 'doc_title',
+			'secondary' => 'destination_folder_title'
+		)
+	);
+
+	foreach ($events as $event) {
+		$primary_field = $secondary_field = NULL;
+		$simple_event = $event->toSimpleObject();
+		$doc_event_type = $event->getType();
+		$doc_event_action = $event->getName();
+
+		if (array_key_exists($doc_event_action, $multi_events)) {
+			$secondary_field = $multi_events[$doc_event_action]['secondary'];
+			$primary_field = $multi_events[$doc_event_action]['primary'];
+		}
+
+		foreach ($simple_event->parameters as $param) {
+			if ($param['name'] == 'primary_event' && $param['boolValue'] == TRUE) {
+				break 2;
+			}
+		}
+	}
+	
+	$event_info = array();
+	foreach ($simple_event->parameters as $param) {
+		if (isset($param['value'])) {
+			$event_info[$param['name']] = $param['value'];
+		} else if (isset($param['boolValue'])) {
+			$event_info[$param['name']] = $param['boolValue'];
+		} else if (isset($param['multiValue'])) {
+			$event_info[$param['name']] = $param['multiValue'];
+		}
+	}
+
+	$doc_title = $event_info['doc_title'];
+	$doc_type = $event_info['doc_type'];
+
+	if ($doc_event_type == 'access') {
+		
+
+		if ($secondary_field) {
+			$doc_primary = is_array($event_info[$primary_field]) ? $event_info[$primary_field][0] : $event_info[$primary_field];
+			$doc_secondary = is_array($event_info[$secondary_field]) ? $event_info[$secondary_field][0] : $event_info[$secondary_field];
+			
+			$string_vals = array(
+				$doc_primary,
+				$doc_secondary
+			);
+		} else {
+			$string_vals = array($doc_title);
+		}
+
+		$doc_event_string = elgg_echo("members-extender:drive:{$doc_event_action}", $string_vals);
+	} else {
+		$doc_event_string = elgg_echo('members-extender:drive:permissions', array($doc_title));
+	}
+
+	return array(
+		'doc_type' => $doc_type,
+		'doc_title' => $doc_title,
+		'doc_event_type' => $doc_event_type,
+		'doc_event_action' => $doc_event_action,
+		'doc_event_string' => $doc_event_string,
+		'doc_event_date' => $doc_event_date
+	);
 }

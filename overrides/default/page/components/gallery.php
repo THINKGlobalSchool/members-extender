@@ -5,10 +5,20 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2014
+ * @copyright THINK Global School 2010 - 2015
  * @link http://www.thinkglobalschool.com/
  * 
  */
+
+$page_owner = elgg_get_page_owner_entity();
+
+if (elgg_instanceof($page_owner, 'group')) {
+	if (!$page_owner->canEdit()) {
+		return;
+	}
+} else if (!members_extender_engagement_gatekeeper()) {
+	return;
+}
 
 $items = $vars['items'];
 $offset = elgg_extract('offset', $vars);
@@ -44,7 +54,6 @@ if (is_array($items) && count($items) > 0) {
 	$view_history = $post_history = $group_access = 'unavailable';
 
 	// Check for and include group only content as necessary
-	$page_owner = elgg_get_page_owner_entity();
 	if (elgg_instanceof($page_owner, 'group')) {
 		$group_header = "<th>$group_h</th>";
 
@@ -129,7 +138,7 @@ HTML;
 			$labels = json_encode(array_keys($posts));
 			$values = json_encode(array_values($posts));
 
-			$post_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
+			$post_history = "<canvas data-labels={$labels} data-values={$values} class='post-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
 
 			$post_class = '';
 		} else {
@@ -154,7 +163,7 @@ HTML;
 			$labels = json_encode(array_keys($views));
 			$values = json_encode(array_values($views));
 
-			$view_history = "<canvas data-labels={$labels} data-values={$values} class='spot-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
+			$view_history = "<canvas data-labels={$labels} data-values={$values} class='view-chart engagement-chart' id='post-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas>";
 
 			$view_class = '';
 
@@ -165,7 +174,7 @@ HTML;
 		$last_view = $last_activity_date = FALSE;
 
 		if ($view_history_stats['last_view']) {
-			$last_view = $view_history_stats['last_view'] + members_extender_get_submission_timezone_offset();
+			$last_view = $view_history_stats['last_view'] + members_extender_get_timezone_offset();
 			$last_activity_date = date('d/m/y g:i:s A', $last_view);
 		}
 
@@ -173,7 +182,7 @@ HTML;
 		if (!$last_activity_date) {
 			// Use last login date if no views are available
 			if ($item->last_login) {
-				$last_activity_date = date('d/m/y g:i:s A', $item->last_login + members_extender_get_submission_timezone_offset());
+				$last_activity_date = date('d/m/y g:i:s A', $item->last_login + members_extender_get_timezone_offset());
 			} else {
 				$last_activity_date = elgg_echo('members-extender:stats:never');
 				$activity_class = 'empty-value';
@@ -188,7 +197,9 @@ HTML;
 				$drive_history_stats = members_extender_get_user_drive_activity_stats($item, $last_week, $today);
 			}
 
-			if (count($drive_history_stats)) {
+			if (!$item->email || $item->email === "" || !(substr($item->email, -strlen(MEMBERS_GAPPS_DOMAIN)) === MEMBERS_GAPPS_DOMAIN)) {
+				$drive_history = "<td class='empty-value member-engagement-drive'>unavailable</td>";
+			} else {
 				$drive_activity = array();
 
 				foreach ($drive_history_stats as $date => $count) {
@@ -198,12 +209,9 @@ HTML;
 				$labels = json_encode(array_keys($drive_activity));
 				$values = json_encode(array_values($drive_activity));
 
-				$drive_history = "<td class='member-engagement-drive'><canvas data-labels={$labels} data-values={$values} class='drive-chart engagement-chart' id='drive-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas></td>"; 
+				$endpoint = elgg_normalize_url("ajax/view/members-extender/engagement_detail/drive?user_guid={$item->guid}");
 
-				$drive_class = '';
-
-			} else {
-				$drive_class = 'empty-value';
+				$drive_history = "<td class='member-engagement-drive'><canvas data-endpoint='{$endpoint}' data-labels={$labels} data-values={$values} class='drive-chart engagement-chart' id='drive-chart-{$item->guid}' width='10px' height='{$canvas_height}'></canvas></td>"; 
 			}
 		}
 

@@ -116,6 +116,7 @@ function members_extender_init() {
 
 	// Whitelist ajax views
 	elgg_register_ajax_view('members-extender/list');
+	elgg_register_ajax_view('members-extender/engagement_detail/drive');
 }
 
 /**
@@ -462,4 +463,6 @@ function members_extender_drive_activity_cron($hook, $type, $value, $params) {
 	}
 
 	elgg_save_system_cache('google_user_drive_activity_cache', serialize($google_user_drive_activity));
+
+	return $value;
 }

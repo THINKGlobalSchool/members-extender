@@ -26,6 +26,8 @@ $english = array(
 	'members-extender:label:awsaccessdbtable' => 'AWS DynamoDB table',
 	'members-extender:label:activity_tz' => 'Activity Timezone',
 	'members-extender:label:group_prefix' => 'Group %s',
+	'members-extender:label:userdriveactivity' => '%s\'s Google Drive Activity', 
+	'members-extender:label:noresults' => 'No Results',
 
 	// Stats
 	'members-extender:stats:user' => 'User',
@@ -38,6 +40,21 @@ $english = array(
 	'members-extender:stats:online' => 'Online',
 	'members-extender:stats:offline' => 'Offline',
 	'members-extender:stats:never' => 'Never',
+
+	// Google Drive Activity
+	'members-extender:drive:create' => 'Created %s',
+	'members-extender:drive:upload' => 'Uploaded %s',
+	'members-extender:drive:edit' => 'Edited %s',
+	'members-extender:drive:view' => 'Viewed %s',
+	'members-extender:drive:rename' => 'Renamed %s to %s',
+	'members-extender:drive:move' => 'Moved %s to %s',
+	'members-extender:drive:add_to_folder' => 'Added %s to folder %s',
+	'members-extender:drive:remove_from_folder' => 'Removed %s from folder %s',
+	'members-extender:drive:trash' => 'Trashed %s',
+	'members-extender:drive:delete' => 'Deleted %s',
+	'members-extender:drive:untrash' => 'Untrashed %s',
+	'members-extender:drive:permissions' => 'Updated permissions for %s',
+	'members-extender:drive:unknown' => 'Modified %s',
 
 	// Admin
 	'members-extender:admin:api_client_id' => 'Google API Client ID',
