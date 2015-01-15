@@ -112,7 +112,7 @@ function members_extender_init() {
 	elgg_register_plugin_hook_handler('register', 'menu:members_custom', 'members_custom_menu_setup');
 
 	// Register cron for updating member Google Drive activity
-	elgg_register_plugin_hook_handler('cron', 'fifteenmin', 'members_extender_drive_activity_cron');
+	elgg_register_plugin_hook_handler('cron', 'hourly', 'members_extender_drive_activity_cron');
 
 	// Whitelist ajax views
 	elgg_register_ajax_view('members-extender/list');
