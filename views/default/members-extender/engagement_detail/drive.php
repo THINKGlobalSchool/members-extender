@@ -21,17 +21,17 @@ if (!elgg_instanceof($user, 'user')) {
 $today = time();
 $last_week = strtotime("-7 days", $today);
 
-$activity = members_extender_get_user_drive_activity($user, $last_week, $today, FALSE, 15);
+$activity = members_extender_get_user_drive_activity($user, $last_week, $today);
 
 if (count($activity)) {
-	$activity_content .= '<ul>';
+	$activity_content .= '<div class="members-extender-engagement-drive-list"><ul>';
 
 	foreach ($activity as $a) {
 		$event_info = members_extender_get_events_info($a);
 		$activity_content .= elgg_view('members-extender/drive/item', $event_info);
 	}
 
-	$activity_content .= '</ul>';
+	$activity_content .= '</ul></div>';
 
 } else {
 	$activity_content = elgg_echo('members-extender:label:noresults');

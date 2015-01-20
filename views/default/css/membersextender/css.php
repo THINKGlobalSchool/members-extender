@@ -196,6 +196,11 @@
 	padding-top: 7px;
 }
 
+.members-extender-engagement-drive-list {
+	height: 400px;
+	overflow-y: scroll;
+}
+
 /** Admin area **/
 .members-sub-categories-container {
 	display: none;
