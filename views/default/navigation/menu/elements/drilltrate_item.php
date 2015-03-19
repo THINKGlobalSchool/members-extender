@@ -37,7 +37,7 @@ if ($children) {
 }
 
 echo "<li class=\"$item_class\" id='{$parent_id}' >";
-echo $item->getContent();
+echo elgg_view_menu_item($item);
 if ($children) {
 	echo $children;
 }

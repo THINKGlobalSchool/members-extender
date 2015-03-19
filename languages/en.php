@@ -5,13 +5,11 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2012
- * @link http://www.thinkglobalschool.com/
+ * @copyright THINK Global School 2010 - 2015
+ * @link http://www.thinkglobalschool.org/
  * 
  */
-$english = array(
-	// General
-	
+return array(
 	// Labels
 	'members-extender:label:all' => 'All',
 	'members-extender:label:hiddenrole' => 'Hidden Role',
@@ -55,14 +53,4 @@ $english = array(
 	'members-extender:drive:untrash' => 'Untrashed %s',
 	'members-extender:drive:permissions' => 'Updated permissions for %s',
 	'members-extender:drive:unknown' => 'Modified %s',
-
-	// Admin
-	'members-extender:admin:api_client_id' => 'Google API Client ID',
-	'members-extender:admin:service_address' => 'Google API Service Account Email Address',
-	'members-extender:admin:authentication' => 'Client Authentication',
-	'members-extender:admin:keylocation' => 'Location of Service Account Private Key',
-	'members-extender:admin:keypassword' => 'Service key password',
-	'members-extender:admin:impersonate' => 'Impersonate (Admin) User',
 );
-
-add_translation('en',$english);

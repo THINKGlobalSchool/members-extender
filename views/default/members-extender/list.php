@@ -23,7 +23,9 @@ $sub = get_input('sub', FALSE);
 $options = array(
 	'type' => 'user', 
 	'full_view' => FALSE,
-	'limit' => 36
+	'limit' => 36,
+	'gallery_class' => 'elgg-gallery-users',
+	'class' => 'members-gallery-avatar'
 );
 
 $dbprefix = elgg_get_config('dbprefix');

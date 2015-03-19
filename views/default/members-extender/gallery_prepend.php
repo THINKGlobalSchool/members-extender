@@ -11,8 +11,6 @@
  */
 
 if ((elgg_in_context('members') || elgg_in_context('members_custom_avatar'))) {
-	$vars['gallery_class'] = 'elgg-gallery-users';
-
 	// Determine if we're including the engagment link to toggle engagement view
 	if (get_input('include_engagement') && (members_extender_engagement_gatekeeper() || elgg_get_page_owner_entity()->canEdit())) {
 		$url = current_page_url();

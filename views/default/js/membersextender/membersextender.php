@@ -43,53 +43,55 @@ elgg.membersextender.init = function() {
 
 // Init chart.js
 elgg.membersextender.initCharts = function() {
-	$('.engagement-chart').each(function(idx) {
-		var context = this.getContext("2d");
-		
-		this.style.width='100%';
-		this.width  = this.offsetWidth;
+	require(['chartjs'], function(chartjs) {
+		$('.engagement-chart').each(function(idx) {
+			var context = this.getContext("2d");
+			
+			this.style.width='100%';
+			this.width  = this.offsetWidth;
 
-		if ($(this).hasClass('post-chart') || $(this).hasClass('view-chart')) {
-			var color = "rgba(130,21,26,0.8)";
-			var options = elgg.membersextender.activity_options;
+			if ($(this).hasClass('post-chart') || $(this).hasClass('view-chart')) {
+				var color = "rgba(130,21,26,0.8)";
+				var options = elgg.membersextender.activity_options;
 
-			var max = 50;
-			var step = 25;
-			var start = 0;
+				var max = 50;
+				var step = 25;
+				var start = 0;
 
-			options.scaleOverride = true;
-			options.scaleSteps = Math.ceil(max/step);
-			options.scaleStepWidth = step;
-			options.scaleStartValue = start;
+				options.scaleOverride = true;
+				options.scaleSteps = Math.ceil(max/step);
+				options.scaleStepWidth = step;
+				options.scaleStartValue = start;
 
 
-		} else if ($(this).hasClass('drive-chart')) {
-			var color = "rgba(9,159,87,1)";
-			var options = elgg.membersextender.activity_options;
+			} else if ($(this).hasClass('drive-chart')) {
+				var color = "rgba(9,159,87,1)";
+				var options = elgg.membersextender.activity_options;
 
-			var max = 80;
-			var step = 1;
-			var start = 0;
+				var max = 80;
+				var step = 1;
+				var start = 0;
 
-			options.scaleOverride = true;
-			options.scaleSteps = Math.ceil(max/step);
-			options.scaleStepWidth = step;
-			options.scaleStartValue = start;
-		}
+				options.scaleOverride = true;
+				options.scaleSteps = Math.ceil(max/step);
+				options.scaleStepWidth = step;
+				options.scaleStartValue = start;
+			}
 
-		var data = {
-		    labels: $(this).data('labels'),
-		    datasets: [
-		        {
-		            fillColor: color,
-		            strokeColor: color,
-		            highlightFill: color,
-		            data: $(this).data('values')
-		        }
-		    ]
-		};
+			var data = {
+			    labels: $(this).data('labels'),
+			    datasets: [
+			        {
+			            fillColor: color,
+			            strokeColor: color,
+			            highlightFill: color,
+			            data: $(this).data('values')
+			        }
+			    ]
+			};
 
-		var chart = new Chart(context).Bar(data, options);
+			var chart = new Chart(context).Bar(data, options);
+		});
 	});
 }
 
@@ -130,7 +132,7 @@ elgg.membersextender.activity_options = {
 
 elgg.membersextender.initLightboxen = function() {
 	$('.drive-chart').each(function(idx) {
-		$(this).fancybox({
+		$(this).colorbox({
 			'href': $(this).data('endpoint')
 		});
 	});

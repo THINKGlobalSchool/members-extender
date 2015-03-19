@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
  * @copyright THINK Global School 2010 - 2015
- * @link http://www.thinkglobalschool.com/
+ * @link http://www.thinkglobalschool.org/
  * 
  * OVERRIDES:
  * - default/user/default (Changes to the user entity view)
@@ -33,37 +33,32 @@ function members_extender_init() {
 
 	// Register members CSS
 	$m_css = elgg_get_simplecache_url('css', 'membersextender/css');
-	elgg_register_simplecache_view('css/membersextender/css');
 	elgg_register_css('elgg.membersextender', $m_css);
 	elgg_load_css('elgg.membersextender');
 
 	// Register members JS
 	$m_js = elgg_get_simplecache_url('js', 'membersextender/membersextender');
-	elgg_register_simplecache_view('js/membersextender/membersextender');
 	elgg_register_js('elgg.membersextender', $m_js);
 	elgg_load_js('elgg.membersextender');
 
 	// Register drilltrate js library
 	$f_js = elgg_get_simplecache_url('js', 'drilltrate/drilltrate');
-	elgg_register_simplecache_view('js/drilltrate/drilltrate');
 	elgg_register_js('elgg.drilltrate', $f_js);
 
 	// Register drilltrate js library
 	$f_css = elgg_get_simplecache_url('css', 'drilltrate/drilltrate');
-	elgg_register_simplecache_view('css/drilltrate/drilltrate');
 	elgg_register_css('elgg.drilltrate', $f_css);
 	elgg_load_css('elgg.drilltrate');
 
 	// Register drilltrate utilities js library
 	$f_js = elgg_get_simplecache_url('js', 'drilltrate/utilities');
-	elgg_register_simplecache_view('js/drilltrate/utilities');
 	elgg_register_js('elgg.drilltrate.utilities', $f_js);
 
-	// Register piety JS
-	$p_js = elgg_get_simplecache_url('js', 'chartjs');
-	elgg_register_simplecache_view('js/chartjs');
-	elgg_register_js('chart.js', $p_js);
-	elgg_load_js('chart.js');
+	// Define chartjs vendor
+	elgg_define_js('chartjs', array(
+		'src' => '/mod/members-extender/vendors/chart.js',
+		'exports' => 'Chart',
+	));
 
 	// Extend navigation/tabs view
 	//elgg_extend_view('navigation/tabs', 'members-extender/navigation/tabs', 0);
@@ -73,9 +68,6 @@ function members_extender_init() {
 
 	// Extend user icon view
 	elgg_extend_view('icon/user/default', 'members-extender/icon_extend');
-
-	// Prepend user icon view
-	elgg_extend_view('icon/user/default', 'members-extender/icon_prepend', 0);
 
 	// Extend roles form
 	elgg_extend_view('forms/roles/edit/extend', 'members-extender/role_form');
@@ -234,6 +226,46 @@ function members_extender_route_groups_handler($hook, $type, $return, $params) {
 		set_input('limit', 28);
 		set_input('include_engagement', TRUE);
 		elgg_push_context('members_custom_avatar');
+	
+		// We're going to handle output here
+		$guid = $return['segments'][1];
+
+		elgg_entity_gatekeeper($guid, 'group');
+
+		$group = get_entity($guid);
+
+		elgg_set_page_owner_guid($guid);
+
+		elgg_group_gatekeeper();
+
+		$title = elgg_echo('groups:members:title', array($group->name));
+
+		elgg_push_breadcrumb($group->name, $group->getURL());
+		elgg_push_breadcrumb(elgg_echo('groups:members'));
+
+		$db_prefix = elgg_get_config('dbprefix');
+		$content = elgg_list_entities_from_relationship(array(
+			'relationship' => 'member',
+			'relationship_guid' => $group->guid,
+			'inverse_relationship' => true,
+			'type' => 'user',
+			'limit' => (int)get_input('limit', max(20, elgg_get_config('default_limit')), false),
+			'joins' => array("JOIN {$db_prefix}users_entity u ON e.guid=u.guid"),
+			'order_by' => 'u.name ASC',
+			'gallery_class' => 'elgg-gallery-users'
+		));
+
+		$params = array(
+			'content' => $content,
+			'title' => $title,
+			'filter' => '',
+		);
+		$body = elgg_view_layout('content', $params);
+
+		echo elgg_view_page($title, $body);
+
+
+		return false;
 	}
 	return $return;
 }
@@ -401,7 +433,7 @@ function members_custom_menu_setup($hook, $type, $return, $params) {
 			'href' => '#',
 			'text' => $en_text,
 			'encode_text' => FALSE,
-			'class' => 'drilltrate-toggle ' . $class,
+			'link_class' => 'drilltrate-toggle ' . $class,
 			'data-toggle-on-text' => elgg_echo('members-extender:label:viewengagement'),
 			'data-toggle-off-text' => elgg_echo('members-extender:label:viewgallery'), 
 			'data-param' => 'engagement',

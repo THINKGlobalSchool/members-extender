@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
  * @copyright THINK Global School 2010 - 2015
- * @link http://www.thinkglobalschool.com/
+ * @link http://www.thinkglobalschool.org/
  * 
  */
 ?>
@@ -20,8 +20,11 @@
 	cursor: pointer;
 }
 
-.elgg-avatar > .elgg-icon-hover-menu  {
+.elgg-avatar.elgg-avatar-medium.members-gallery-avatar > .elgg-icon-hover-menu  {
+	background: transparent url(<?php echo elgg_get_site_url();?>mod/members-extender/graphics/avatar_menu_arrows_white.png) no-repeat;
 	z-index: 4;
+	height: 40px;
+	width: 40px;
 }
 
 .members-gallery-hover .members-gallery-hover-name {
@@ -86,11 +89,9 @@
 
 .elgg-menu-item-view-engagement > a,
 .elgg-menu-filter > li.elgg-menu-item-view-engagement.elgg-state-selected > a {
-	color: #91131E !important;
 	text-transform: none !important;
-	font-family: "Lucida Grande",​Arial,​Tahoma,​Verdana,​sans-serif;
-	font-size: 1.1em;
 	background: none;
+	color: #5097CF !important;
 }
 .elgg-menu-item-view-engagement > a:hover,
 .elgg-menu-filter > li.elgg-menu-item-view-engagement > a:hover {
@@ -136,9 +137,7 @@
 	text-align: center;
 }
 
-.member-engagement-table canvas.post-chart,
-.member-engagement-table canvas.drive-chart,
-.member-engagement-table canvas.view-chart {
+.member-engagement-table canvas.drive-chart {
 	cursor: pointer;
 }
 

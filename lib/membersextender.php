@@ -6,7 +6,7 @@
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
  * @copyright THINK Global School 2010 - 2015
- * @link http://www.thinkglobalschool.com/
+ * @link http://www.thinkglobalschool.org/
  * 
  */
 
@@ -244,7 +244,10 @@ function members_extender_get_user_drive_activity($user, $start, $end, $page_tok
 		return FALSE;
 	}
 
-	$client = members_extender_get_google_service_client();
+	$client = googleapps_get_service_client(array(
+		"https://www.googleapis.com/auth/admin.reports.audit.readonly",
+		"https://www.googleapis.com/auth/admin.reports.usage.readonly"
+	));
 	
 	elgg_load_library('gapc:Reports');
 
@@ -378,8 +381,6 @@ function members_extender_add_user_view($user, $object) {
 
 	$time = round(microtime(true)*1000);
 
-//	elgg_dump($time);
-
 	// Create item
 	$item = array(
 		"UserId" => $client->formatValue((int)$user->guid),
@@ -387,7 +388,7 @@ function members_extender_add_user_view($user, $object) {
 		"ObjectContainerId" => $client->formatValue((int)$container_guid),
 		"ObjectOwnerId" => $client->formatValue((int)$object->owner_guid),
 		"ObjectType" => $client->formatValue($object->getType()),
-		"ObjectSubtype" => $client->formatValue($object->getSubtype()),
+		"ObjectSubtype" => $client->formatValue($object->getSubtype() ? $object->getSubtype() : 0), // subtype can be empty (ie: groups)
 		"ObjectCreated" => $client->formatValue((int)$object->time_created),
 		"ObjectUpdated" => $client->formatValue((int)$object->time_updated),
 		"Time" => $client->formatValue((int)$time)
@@ -455,7 +456,7 @@ function members_extender_get_user_views(array $options = array()) {
 
 	$options = array_merge($defaults, $options);
 	$singulars = array('type', 'subtype', 'guid', 'owner_guid', 'container_guid', 'view_user_guid');
-	$options = elgg_normalise_plural_options_array($options, $singulars);
+	$options = _elgg_normalize_plural_options_array($options, $singulars);
 
 	if (empty($options['view_user_guids'])) {
 		return FALSE; // Need at least one user guid to query against
@@ -737,54 +738,6 @@ function members_extender_get_timezone_offset() {
 	$offset =  $time_zone->getOffset($current_dt);
 
 	return $offset;
-}
-
-/**
- * Get google client with configured service account credentials
- */
-function members_extender_get_google_service_client($impersonate = FALSE) {
-	elgg_load_library('gapc:Client');
-	$plugin = elgg_get_plugin_from_id('members-extender');
-
-	$client = new Google_Client();
-	$client->setApplicationName("TGS Drive Activity");
-
-	if ($plugin->service_token) {
-		$client->setAccessToken($plugin->service_token);
-	}
-
-	// Get auth/key info from plugin settings
-	$key_location = elgg_get_plugin_setting('google_api_client_service_key', 'members-extender');
-	$key_password = elgg_get_plugin_setting('google_api_client_service_key_password', 'members-extender');
-	$service_account = elgg_get_plugin_setting('google_api_client_address', 'members-extender');
-	
-	// If no user is supplied to impersonate, use the admin user
-	if (!$impersonate) {
-		$impersonate = elgg_get_plugin_setting('google_api_client_service_key_impersonate', 'members-extender');
-	}
-
-	$key = file_get_contents($key_location);
-
-	// Get credentials
-	$credentials = new Google_Auth_AssertionCredentials(
-		$service_account,
-		array(
-			"https://www.googleapis.com/auth/admin.reports.audit.readonly",
-			"https://www.googleapis.com/auth/admin.reports.usage.readonly"
-		),
-		$key,
-		$key_password,
-		'http://oauth.net/grant_type/jwt/1.0/bearer',
-		$impersonate
-	);
-	$client->setAssertionCredentials($credentials);
-
-	if($client->getAuth()->isAccessTokenExpired()) {
-		$client->getAuth()->refreshTokenWithAssertion($credentials);
-	}
-	$plugin->service_token = $client->getAccessToken();
-
-	return $client;
 }
 
 /**

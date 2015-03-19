@@ -5,8 +5,8 @@
  * @package Members-Extender
  * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html GNU Public License version 2
  * @author Jeff Tilson
- * @copyright THINK Global School 2010 - 2014
- * @link http://www.thinkglobalschool.com/
+ * @copyright THINK Global School 2010 - 2015
+ * @link http://www.thinkglobalschool.org/
  * 
  */
 ?>
@@ -28,43 +28,29 @@
 }
 
 .drilltrate-menu-main.elgg-menu-filter, 
-.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter {
-	background: none;
-	margin-bottom: 0;
-}
+.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter {}
 
 .drilltrate-menu-container .elgg-child-menu.elgg-menu-filter {
 	clear: both;
 }
 
-.drilltrate-menu-main.elgg-menu-filter li {
-	margin: 0;
-	border: none;
-	border-left: 1px solid #444;
-	border-bottom: 1px solid #444;
-	border-top: 1px solid #444;
-}
+.drilltrate-menu-main.elgg-menu-filter li {}
 
 .drilltrate-menu-container .elgg-child-menu li {
-	font-size: 0.9em;
 	padding: 3px 10px 0 0;
-	text-transform: uppercase;
 }
 
 .drilltrate-menu-container .elgg-child-menu li.elgg-state-selected a {
 	text-decoration: underline;
 	font-weight: bold;
+	color: #555;
 }
 
 .drilltrate-menu-main.elgg-menu-filter li:last-child,
-.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter li:last-child {
-	border-right: 1px solid #444;
-}
+.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter li:last-child {}
 
 .drilltrate-menu-main.elgg-menu-filter li a, 
-.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter li a {
-	padding: 3px 15px 0;
-}
+.drilltrate-menu-container .elgg-child-menu.elgg-menu-filter li a {}
 
 .drilltrate-menu-container ul.elgg-child-menu {
 	display: none;
