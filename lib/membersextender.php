@@ -749,9 +749,9 @@ function members_extender_get_google_service_client($impersonate = FALSE) {
 	$client = new Google_Client();
 	$client->setApplicationName("TGS Drive Activity");
 
-	if ($plugin->service_token) {
-		$client->setAccessToken($plugin->service_token);
-	}
+	// if ($plugin->service_token) {
+	// 	$client->setAccessToken($plugin->service_token);
+	// }
 
 	// Get auth/key info from plugin settings
 	$key_location = elgg_get_plugin_setting('google_api_client_service_key', 'members-extender');
