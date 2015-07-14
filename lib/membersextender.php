@@ -91,8 +91,8 @@ function members_extender_get_exclude_parent_sql() {
 		global $CONFIG;
 
 		// MD info for excluding parents
-		$is_parent = get_metastring_id('is_parent');
-		$one_id = get_metastring_id(1);
+		$is_parent = elgg_get_metastring_id('is_parent');
+		$one_id = elgg_get_metastring_id(1);
 		
 		$parent_sql = "
 		  NOT EXISTS (
