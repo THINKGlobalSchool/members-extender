@@ -1,35 +1,34 @@
 <?php
 /**
- * Elgg user display
- * - OVERRIDE
+ * Elgg user display - OVERRIDE
  *
  * @uses $vars['entity'] ElggUser entity
  * @uses $vars['size']   Size of the icon
+ * @uses $vars['title']  Optional override for the title
  */
 
 $entity = $vars['entity'];
 
-// Tweak: allow icon size to be set via input
 $size = elgg_extract('size', $vars, get_input('user_gallery_size', 'tiny'));
 
 $icon = elgg_view_entity_icon($entity, $size, $vars);
 
-// Simple XFN
-$rel = '';
-if (elgg_get_logged_in_user_guid() == $entity->guid) {
-	$rel = 'rel="me"';
-} elseif (check_entity_relationship(elgg_get_logged_in_user_guid(), 'friend', $entity->guid)) {
-	$rel = 'rel="friend"';
+$title = elgg_extract('title', $vars);
+if (!$title) {
+	$link_params = array(
+		'href' => $entity->getUrl(),
+		'text' => $entity->name,
+	);
+
+	// Simple XFN, see http://gmpg.org/xfn/
+	if (elgg_get_logged_in_user_guid() == $entity->guid) {
+		$link_params['rel'] = 'me';
+	} elseif (check_entity_relationship(elgg_get_logged_in_user_guid(), 'friend', $entity->guid)) {
+		$link_params['rel'] = 'friend';
+	}
+
+	$title = elgg_view('output/url', $link_params);
 }
-
-if (!elgg_is_logged_in() && $s = strpos($entity->name, ' ')) {
-	$name = substr($entity->name, 0, $s);
-} else {
-	$name = $entity->name;
-}
-
-
-$title = "<a href=\"" . $entity->getUrl() . "\" $rel>" . $name . "</a>";
 
 $metadata = elgg_view_menu('entity', array(
 	'entity' => $entity,
